@@ -21,7 +21,6 @@ import butterknife.OnClick;
 import static android.view.View.VISIBLE;
 
 public abstract class RxFragment extends Fragment {
-
     @Bind(R.id.content)      protected ViewGroup contentView;
     @Bind(R.id.loading_view) protected ViewGroup loadingView;
     @Bind(R.id.empty_view)   protected ViewGroup emptyView;
@@ -39,7 +38,7 @@ public abstract class RxFragment extends Fragment {
     }
 
     public void promptForLogin() {
-        ((BaseActivity) getActivity()).promptForLogin();
+        ((BaseActivity) getActivity()).promptForLogin(null);
     }
 
     protected MainComponent getComponent() {

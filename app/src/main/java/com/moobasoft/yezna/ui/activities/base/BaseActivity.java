@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 import com.moobasoft.yezna.App;
 import com.moobasoft.yezna.R;
@@ -44,15 +45,19 @@ public class BaseActivity extends AppCompatActivity {
         return credentialStore.isLoggedIn();
     }
 
-    public void doIfLoggedIn(Intent intent) {
+    /*public void doIfLoggedIn(Intent intent) {
         if (isLoggedIn())
             startActivity(intent);
         else
             promptForLogin();
-    }
+    }*/
 
     public void promptForLogin() {
-        Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_unauthorized), Snackbar.LENGTH_LONG)
+        promptForLogin(findViewById(android.R.id.content));
+    }
+
+    public void promptForLogin(View anchor) {
+        Snackbar.make(anchor, getString(R.string.error_unauthorized), Snackbar.LENGTH_LONG)
                 .setActionTextColor(getResources().getColor(R.color.green400))
                 .setAction(getString(R.string.login), v -> {
                     Intent intent = new Intent(getApplicationContext(), ConnectActivity.class);

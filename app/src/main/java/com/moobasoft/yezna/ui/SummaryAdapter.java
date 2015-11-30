@@ -80,6 +80,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     public void clear() {
         questionList.clear();
+        hideFooter = true;
         notifyDataSetChanged();
     }
 

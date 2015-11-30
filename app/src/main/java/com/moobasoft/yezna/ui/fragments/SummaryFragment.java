@@ -19,7 +19,6 @@ import com.moobasoft.yezna.ui.fragments.base.RxFragment;
 import com.moobasoft.yezna.ui.presenters.SummaryPresenter;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -31,7 +30,6 @@ import static android.view.View.VISIBLE;
 public class SummaryFragment extends RxFragment implements SummaryPresenter.View,
         SwipeRefreshLayout.OnRefreshListener, AppBarLayout.OnOffsetChangedListener {
 
-    public static final String UUID_KEY      = "uuid_key";
     public static final String PAGE_KEY      = "page_key";
     public static final String SUMMARIES_KEY = "summaries_key";
     public static final String SCROLL_KEY    = "scroll_key";
@@ -51,9 +49,6 @@ public class SummaryFragment extends RxFragment implements SummaryPresenter.View
      */
     private boolean appBarIsExpanded = true;
 
-    /** A unique ID to store/retrieve the presenter from a map */
-    private UUID presenterUuid;
-
     /** The current page of post data. Used as a query param. */
     private int currentPage = 1;
 
@@ -67,7 +62,6 @@ public class SummaryFragment extends RxFragment implements SummaryPresenter.View
     @Override
     public void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
-        int columns = getResources().getInteger(R.integer.main_list_columns);
         summaryAdapter = new SummaryAdapter((MainActivity)getActivity());
         scrollListener = new StaggeredScrollListener() {
             @Override public void onLoadMore() {
@@ -83,11 +77,11 @@ public class SummaryFragment extends RxFragment implements SummaryPresenter.View
 
     private void restoreState(@Nullable Bundle state) {
         if (state != null) {
-            presenterUuid = (UUID) state.getSerializable(UUID_KEY);
             currentPage = state.getInt(PAGE_KEY);
             List<Question> questions = state.getParcelableArrayList(SUMMARIES_KEY);
             scrollListener.restoreState(state.getParcelable(SCROLL_KEY));
-            if (scrollListener.isFinished()) summaryAdapter.setFinished();
+            if (scrollListener.isFinished())
+                summaryAdapter.setFinished();
             summaryAdapter.loadQuestions(questions);
         }
     }
@@ -105,21 +99,11 @@ public class SummaryFragment extends RxFragment implements SummaryPresenter.View
     public void onActivityCreated(@Nullable Bundle state) {
         super.onActivityCreated(state);
 
-        presenter = (SummaryPresenter)
-                ((PresenterRetainer.PresenterHost) getActivity()).getPresenter(presenterUuid);
-
-        if (presenter == null) {
-            getComponent().inject(this);
-            presenterUuid = UUID.randomUUID();
-            ((PresenterRetainer.PresenterHost) getActivity()).putPresenter(presenterUuid, presenter);
-        }
-
+        getComponent().inject(this);
         presenter.bindView(this);
 
         if (state == null) { // Add first-init check
             loadPosts(false);
-        } else if (presenter.requestInProgress()) {
-            showLoadingIndicator();
         } else {
             if (summaryAdapter.getSummaryList().isEmpty())
                 activateEmptyView(getString(R.string.no_questions_found));
@@ -143,7 +127,6 @@ public class SummaryFragment extends RxFragment implements SummaryPresenter.View
     @Override
     public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-        state.putSerializable(UUID_KEY, presenterUuid);
         state.putInt(PAGE_KEY, currentPage);
         state.putParcelableArrayList(SUMMARIES_KEY, summaryAdapter.getSummaryList());
         state.putParcelable(SCROLL_KEY, scrollListener.getOutState());
@@ -172,8 +155,9 @@ public class SummaryFragment extends RxFragment implements SummaryPresenter.View
     }
 
     private void setRefreshLayoutEnabled() {
-        if (refreshLayout == null || postsRecyclerView == null) return;
-        boolean canRefresh = appBarIsExpanded && postsRecyclerView.canScrollVertically(-1);
+        if (refreshLayout == null || postsRecyclerView == null)
+            return;
+        boolean canRefresh = appBarIsExpanded && !postsRecyclerView.canScrollVertically(-1);
         refreshLayout.setEnabled(canRefresh);
     }
 
@@ -186,7 +170,6 @@ public class SummaryFragment extends RxFragment implements SummaryPresenter.View
     public void onPostsRetrieved(List<Question> questions) {
         refreshLayout.setRefreshing(false);
 
-        if (currentPage == 1) summaryAdapter.clear();
         currentPage++;
 
         if (summaryAdapter.isEmpty() && questions.isEmpty())
@@ -222,6 +205,7 @@ public class SummaryFragment extends RxFragment implements SummaryPresenter.View
     @Override
     public void onRefresh() {
         scrollListener.reset();
+        summaryAdapter.clear();
         currentPage = 1;
         loadPosts(true);
     }

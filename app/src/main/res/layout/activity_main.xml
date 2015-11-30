@@ -32,7 +32,7 @@
         android:layout_height="match_parent" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/question_btn"
         app:backgroundTint="@color/colorPrimary"
         android:layout_width="wrap_content"
         app:elevation="6dp"

@@ -11,10 +11,11 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.models.Question;
-import com.moobasoft.yezna.ui.SummaryAdapter;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+
+import static com.moobasoft.yezna.ui.SummaryAdapter.SummaryClickListener;
 
 public final class SummaryView extends CardView {
     @Bind(R.id.image)       ImageView imageIv;
@@ -39,7 +40,7 @@ public final class SummaryView extends CardView {
         answerBtnsLayout.setVisibility(visible ? View.GONE : View.VISIBLE);
     }
 
-    public void bindTo(Question question, SummaryAdapter.SummaryClickListener listener) {
+    public void bindTo(Question question, SummaryClickListener listener) {
         //answerBtnsLayout.setVisibility(View.GONE);
 
         if (question.getUser() != null) {
@@ -54,6 +55,8 @@ public final class SummaryView extends CardView {
             Glide.with(getContext())
                     .load(question.getImage())
                     .into(imageIv);
+
+        imageIv.setVisibility(GONE);
 
         questionTv.setText(question.getQuestion());
         dateTv.setText(question.getCreatedAt());
