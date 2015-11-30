@@ -4,11 +4,14 @@
     <string name="login_success">ログインしました</string>
     <string name="login_error">ログインできませんでした</string>
     <string name="register_success">Hello Eigoへようこそ、%1$s</string>
-    <string name="register">登録する</string>
-    <string name="login">ログイン</string>
-    <string name="username">ユーザー名</string>
-    <string name="email">Eメール</string>
-    <string name="password">パスワード</string>
+
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+
     <string name="logout_success">ログアウトしました</string>
     <string name="logout">ログアウト</string>
 

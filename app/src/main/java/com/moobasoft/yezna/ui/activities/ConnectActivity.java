@@ -4,11 +4,11 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moobasoft.yezna.App;
@@ -39,9 +39,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     @Bind(R.id.btn_primary)     Button primaryBtn;
     @Bind(R.id.btn_secondary)   Button secondaryBtn;
     @Bind(R.id.processing_view) ViewGroup processingView;
-    @Bind(R.id.email_tv)        TextView emailTv;
-    @Bind(R.id.username_tv)     TextView usernameTv;
-    @Bind(R.id.password_tv)     TextView passwordTv;
+    @Bind(R.id.email_label)     View emailLabel;
     @Bind(R.id.email_et)        EditText emailEt;
     @Bind(R.id.username_et)     EditText usernameEt;
     @Bind(R.id.password_et)     EditText passwordEt;
@@ -74,12 +72,12 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
 
     private void switchForms(boolean loginForm) {
         if (loginForm) {
-            emailTv.setVisibility(VISIBLE);
+            emailLabel.setVisibility(VISIBLE);
             emailEt.setVisibility(VISIBLE);
             primaryBtn.setText(getString(R.string.register));
             secondaryBtn.setText(getString(R.string.login));
         } else {
-            emailTv.setVisibility(GONE);
+            emailLabel.setVisibility(GONE);
             emailEt.setVisibility(GONE);
             primaryBtn.setText(getString(R.string.login));
             secondaryBtn.setText(getString(R.string.register));

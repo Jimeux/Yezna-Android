@@ -1,11 +1,12 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:gravity="center"
-    android:minWidth="350dp"
     android:maxWidth="380dp"
+    android:minWidth="350dp"
     android:orientation="vertical"
     tools:context="com.moobasoft.helloeigo.ui.activities.ConnectActivity">
 
@@ -14,63 +15,64 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:paddingTop="20dp"
-            android:paddingRight="20dp"
-            android:layout_alignParentRight="true"
             android:id="@+id/btn_close"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
             android:layout_gravity="right"
+            android:paddingRight="20dp"
+            android:paddingTop="20dp"
             android:src="@drawable/ic_close_white_24dp"
             android:tint="@color/grey500" />
 
         <LinearLayout
-            android:padding="25dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="25dp">
 
-            <TextView
-                style="@style/FormLabel"
-                android:id="@+id/username_tv"
-                android:text="@string/username" />
+            <android.support.design.widget.TextInputLayout
+                style="@style/FormLabel">
 
-            <EditText
-                style="@style/FormTextField"
-                android:id="@+id/username_et"
-                android:inputType="text" />
+                <EditText
+                    style="@style/FormTextField"
+                    android:id="@+id/username_et"
+                    android:hint="@string/username"
+                    android:inputType="text" />
+            </android.support.design.widget.TextInputLayout>
 
-            <TextView
-                style="@style/FormLabel"
-                android:id="@+id/email_tv"
-                android:layout_marginTop="15dp"
-                android:text="@string/email" />
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/email_label"
+                style="@style/FormLabel">
 
-            <EditText
-                style="@style/FormTextField"
-                android:id="@+id/email_et"
-                android:inputType="textEmailAddress" />
+                <EditText
+                    style="@style/FormTextField"
+                    android:id="@+id/email_et"
+                    android:hint="@string/email"
+                    android:inputType="textEmailAddress" />
+            </android.support.design.widget.TextInputLayout>
 
-            <TextView
-                style="@style/FormLabel"
-                android:id="@+id/password_tv"
-                android:layout_marginTop="15dp"
-                android:text="@string/password" />
+            <android.support.design.widget.TextInputLayout
+                style="@style/FormLabel">
 
-            <EditText
-                style="@style/FormTextField"
-                android:id="@+id/password_et"
-                android:layout_marginBottom="20dp"
-                android:inputType="textPassword" />
+                <EditText
+                    style="@style/FormTextField"
+                    android:id="@+id/password_et"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:hint="@string/password"
+                    android:inputType="textPassword" />
+            </android.support.design.widget.TextInputLayout>
 
             <Button
                 android:id="@+id/btn_primary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
                 android:background="@color/colorPrimary"
                 android:text="@string/register"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="16sp" />
 
             <include layout="@layout/btn_processing" />
 
@@ -79,10 +81,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textSize="16sp"
-                android:background="@color/grey100"
+                android:background="@color/grey50"
                 android:text="@string/login"
-                android:textColor="@color/grey600" />
+                android:textColor="@color/grey500"
+                android:textSize="16sp" />
         </LinearLayout>
 
     </RelativeLayout>
