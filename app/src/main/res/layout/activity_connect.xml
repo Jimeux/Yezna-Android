@@ -1,0 +1,89 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:gravity="center"
+    android:minWidth="350dp"
+    android:maxWidth="380dp"
+    android:orientation="vertical"
+    tools:context="com.moobasoft.helloeigo.ui.activities.ConnectActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:paddingTop="20dp"
+            android:paddingRight="20dp"
+            android:layout_alignParentRight="true"
+            android:id="@+id/btn_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:src="@drawable/ic_close_white_24dp"
+            android:tint="@color/grey500" />
+
+        <LinearLayout
+            android:padding="25dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/FormLabel"
+                android:id="@+id/username_tv"
+                android:text="@string/username" />
+
+            <EditText
+                style="@style/FormTextField"
+                android:id="@+id/username_et"
+                android:inputType="text" />
+
+            <TextView
+                style="@style/FormLabel"
+                android:id="@+id/email_tv"
+                android:layout_marginTop="15dp"
+                android:text="@string/email" />
+
+            <EditText
+                style="@style/FormTextField"
+                android:id="@+id/email_et"
+                android:inputType="textEmailAddress" />
+
+            <TextView
+                style="@style/FormLabel"
+                android:id="@+id/password_tv"
+                android:layout_marginTop="15dp"
+                android:text="@string/password" />
+
+            <EditText
+                style="@style/FormTextField"
+                android:id="@+id/password_et"
+                android:layout_marginBottom="20dp"
+                android:inputType="textPassword" />
+
+            <Button
+                android:id="@+id/btn_primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:background="@color/colorPrimary"
+                android:text="@string/register"
+                android:textColor="@color/white" />
+
+            <include layout="@layout/btn_processing" />
+
+            <Button
+                android:id="@+id/btn_secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="16sp"
+                android:background="@color/grey100"
+                android:text="@string/login"
+                android:textColor="@color/grey600" />
+        </LinearLayout>
+
+    </RelativeLayout>
+</ScrollView>

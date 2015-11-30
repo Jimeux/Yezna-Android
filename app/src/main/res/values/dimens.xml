@@ -1,0 +1,30 @@
+<resources>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="portrait_title_size">20sp</dimen>
+    <dimen name="land_title_size">18sp</dimen>
+    <dimen name="show_land_overlap_top">75dp</dimen>
+    <dimen name="show_land_margin">16dp</dimen>
+
+    <dimen name="show_backdrop_negative_margin">250dp</dimen>
+    <dimen name="show_backdrop_height">250dp</dimen>
+    <dimen name="show_bottom_padding">@dimen/show_land_margin</dimen>
+    <dimen name="show_padding">22dp</dimen>
+    <dimen name="show_tag_text">17dp</dimen>
+    <dimen name="show_title_text">30sp</dimen>
+    <dimen name="show_body_text">18sp</dimen>
+    <dimen name="show_comment_link_text">18dp</dimen>
+    <dimen name="show_comment_link_padding">8dp</dimen>
+
+    <dimen name="main_card_margin">2dp</dimen>
+    <dimen name="main_image_width">60dp</dimen>
+    <dimen name="main_footer_text">16sp</dimen>
+    <dimen name="main_body_text">16sp</dimen>
+    <dimen name="main_title_text">16sp</dimen>
+    <dimen name="main_list_margin_vert">6dp</dimen>
+    <dimen name="main_list_margin_horiz">6dp</dimen>
+    <dimen name="main_title_spacing">4dp</dimen>
+
+</resources>
