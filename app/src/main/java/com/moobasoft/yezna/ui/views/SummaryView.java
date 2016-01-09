@@ -56,7 +56,7 @@ public final class SummaryView extends CardView {
                     .load(question.getImage())
                     .into(imageIv);
 
-        imageIv.setVisibility(GONE);
+        //imageIv.setVisibility(GONE);
 
         questionTv.setText(question.getQuestion());
         dateTv.setText(question.getCreatedAt());

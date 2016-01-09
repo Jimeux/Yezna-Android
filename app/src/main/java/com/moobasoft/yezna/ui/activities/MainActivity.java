@@ -40,6 +40,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         ButterKnife.bind(this);
         getComponent().inject(this);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("");
         fragmentManager = getFragmentManager();
 
         if (state == null)
@@ -66,6 +67,9 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+            case R.id.action_create:
+                promptForLogin(toolbar);
 
             /** Auth-related items */
             case R.id.action_login:
