@@ -13,11 +13,10 @@ import android.view.ViewGroup;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
-import com.moobasoft.yezna.ui.fragments.SummaryFragment;
+import com.moobasoft.yezna.ui.fragments.RandomFragment;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 import static com.moobasoft.yezna.ui.SummaryAdapter.SummaryClickListener;
 
@@ -27,11 +26,6 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
     @Bind(R.id.container) ViewGroup container;
     @Bind(R.id.toolbar)   Toolbar toolbar;
-
-    @OnClick(R.id.question_btn)
-    public void clickQuestionBtn() {
-        promptForLogin(toolbar);
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle state) {
@@ -45,7 +39,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
         if (state == null)
             fragmentManager.beginTransaction()
-                    .add(container.getId(), new SummaryFragment())
+                    .add(container.getId(), new RandomFragment())
                     .commit();
     }
 
@@ -70,6 +64,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
             case R.id.action_create:
                 promptForLogin(toolbar);
+                break;
 
             /** Auth-related items */
             case R.id.action_login:

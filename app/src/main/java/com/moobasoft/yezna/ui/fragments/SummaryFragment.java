@@ -89,7 +89,7 @@ public class SummaryFragment extends RxFragment implements SummaryPresenter.View
     @Nullable @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_summary, container, false);
-        appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar);
+        //appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar);
         ButterKnife.bind(this, view);
         initialiseRecyclerView();
         return view;

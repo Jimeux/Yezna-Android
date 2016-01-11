@@ -4,6 +4,7 @@ import com.moobasoft.yezna.ui.activities.ConnectActivity;
 import com.moobasoft.yezna.ui.activities.MainActivity;
 import com.moobasoft.yezna.di.modules.MainModule;
 import com.moobasoft.yezna.di.scopes.PerActivity;
+import com.moobasoft.yezna.ui.fragments.RandomFragment;
 import com.moobasoft.yezna.ui.fragments.SummaryFragment;
 
 import dagger.Component;
@@ -22,5 +23,6 @@ public interface MainComponent {
     void inject(MainActivity mainIndexActivity);
     void inject(ConnectActivity connectActivity);
     void inject(SummaryFragment summaryFragment);
+    void inject(RandomFragment randomFragment);
 
 }

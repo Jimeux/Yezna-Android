@@ -57,6 +57,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public void promptForLogin(View anchor) {
+        if (anchor == null) promptForLogin();
         Snackbar.make(anchor, getString(R.string.error_unauthorized), Snackbar.LENGTH_LONG)
                 .setActionTextColor(getResources().getColor(R.color.green400))
                 .setAction(getString(R.string.login), v -> {

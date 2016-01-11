@@ -1,12 +1,15 @@
 package com.moobasoft.yezna.rest.services;
 
 import com.moobasoft.yezna.rest.models.Question;
+import com.moobasoft.yezna.rest.requests.AnswerRequest;
 
 import java.util.List;
 
 import retrofit.Result;
+import retrofit.http.Body;
 import retrofit.http.GET;
 import retrofit.http.Header;
+import retrofit.http.POST;
 import retrofit.http.Path;
 import retrofit.http.Query;
 import rx.Observable;
@@ -23,4 +26,7 @@ public interface QuestionService {
     Observable<Result<List<Question>>> index(@Header(CACHE_CONTROL_HEADER) String cacheControl,
                                              @Query("page") int page);
 
+    @POST("/api/questions/{id}/answers")
+    Observable<Question> answer(@Path("id") int questionId,
+                                @Body AnswerRequest answerRequest);
 }

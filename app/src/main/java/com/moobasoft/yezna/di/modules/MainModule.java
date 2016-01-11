@@ -6,6 +6,7 @@ import com.moobasoft.yezna.rest.services.QuestionService;
 import com.moobasoft.yezna.rest.services.UserService;
 import com.moobasoft.yezna.ui.RxSubscriber;
 import com.moobasoft.yezna.ui.presenters.ConnectPresenter;
+import com.moobasoft.yezna.ui.presenters.RandomPresenter;
 import com.moobasoft.yezna.ui.presenters.SummaryPresenter;
 
 import dagger.Module;
@@ -21,6 +22,13 @@ public class MainModule {
     public RxSubscriber rxSubscriber() {
         // TODO: provide these schedulers
         return new RxSubscriber(Schedulers.io(), AndroidSchedulers.mainThread());
+    }
+
+    @PerActivity
+    @Provides
+    public RandomPresenter randomPresenter(RxSubscriber subscriptionManager,
+                                           QuestionService questionService) {
+        return new RandomPresenter(questionService, subscriptionManager);
     }
 
     @PerActivity
