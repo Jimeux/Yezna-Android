@@ -114,6 +114,7 @@
                 android:weightSum="1">
 
                 <Button
+                    style="@style/Widget.AppCompat.Button.Colored"
                     android:id="@+id/yes_btn"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -129,6 +130,7 @@
                     android:textColor="@color/grey700" />
 
                 <Button
+                    style="@style/Widget.AppCompat.Button.Colored"
                     android:id="@+id/no_btn"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

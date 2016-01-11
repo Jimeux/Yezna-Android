@@ -2,12 +2,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_create"
+        android:id="@+id/action_list"
+        android:title="My questions"
         android:orderInCategory="100"
-        android:icon="@drawable/ic_edit"
+        android:icon="@drawable/ic_person_white_24dp"
         app:showAsAction="ifRoom" />
 
-    <group android:id="@+id/connect_actions">
+    <item
+        android:id="@+id/action_create"
+        android:title="Ask a question"
+        android:orderInCategory="101"
+        android:icon="@drawable/ic_edit_white_24dp"
+        app:showAsAction="ifRoom" />
+
+<!--    <group android:id="@+id/connect_actions">
         <item
             android:id="@+id/action_register"
             android:orderInCategory="101"
@@ -23,6 +31,6 @@
             android:orderInCategory="103"
             android:title="@string/logout"
             app:showAsAction="never" />
-    </group>
+    </group>-->
 
 </menu>
