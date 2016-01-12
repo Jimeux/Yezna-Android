@@ -14,11 +14,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.models.Question;
+import com.moobasoft.yezna.rest.models.User;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
-import com.moobasoft.yezna.ui.fragments.RandomFragment;
+import com.moobasoft.yezna.ui.fragments.PublicQuestionFragment;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -29,9 +33,10 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
     private FragmentManager fragmentManager;
 
-    @Bind(R.id.container) ViewGroup container;
-    @Bind(R.id.toolbar)   Toolbar toolbar;
-    private DrawerLayout drawerLayout;
+    @Bind(R.id.drawer_layout)   DrawerLayout drawerLayout;
+    @Bind(R.id.navigation_view) NavigationView navigationView;
+    @Bind(R.id.toolbar)         Toolbar toolbar;
+    @Bind(R.id.container)       ViewGroup container;
 
     @Override
     protected void onCreate(@Nullable Bundle state) {
@@ -43,11 +48,16 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         getSupportActionBar().setTitle("");
         fragmentManager = getFragmentManager();
 
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        initNavigationDrawer();
 
-        NavigationView view = (NavigationView) findViewById(R.id.navigation_view);
-        view.setNavigationItemSelectedListener(item -> {
+        if (state == null)
+            fragmentManager.beginTransaction()
+                    .add(container.getId(), new PublicQuestionFragment())
+                    .commit();
+    }
 
+    private void initNavigationDrawer() {
+        navigationView.setNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 /** Auth-related items */
                 case R.id.action_login:
@@ -67,43 +77,54 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 case R.id.action_logout:
                     credentialStore.delete();
                     Snackbar.make(container, getString(R.string.logout_success), Snackbar.LENGTH_SHORT).show();
+                    setMenuItems();
                     break;
             }
-            Snackbar.make(container, item.getTitle() + " pressed", Snackbar.LENGTH_LONG).show();
-            item.setChecked(true);
             drawerLayout.closeDrawers();
-            return true;
+            item.setChecked(false);
+            return false;
         });
 
-
-        // Initializing Drawer Layout and ActionBarToggle
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.login, R.string.logout){
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar, R.string.login, R.string.logout) {
             @Override
             public void onDrawerClosed(View drawerView) {
-                // Code here will be triggered once the drawer closes as we dont want anything to happen so we leave this blank
                 super.onDrawerClosed(drawerView);
             }
 
             @Override
             public void onDrawerOpened(View drawerView) {
-                // Code here will be triggered once the drawer open as we dont want anything to happen so we leave this blank
-
                 super.onDrawerOpened(drawerView);
             }
         };
 
-        //Setting the actionbarToggle to drawer layout
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
-
-        //calling sync state is necessay or else your hamburger icon wont show up
         actionBarDrawerToggle.syncState();
+        setMenuItems();
+        loadUserDetails();
+    }
 
+    private void loadUserDetails() {
+        User user = credentialStore.loadUser();
 
+        if (user != null) {
+            View header = navigationView.getHeaderView(0);
 
-        if (state == null)
-            fragmentManager.beginTransaction()
-                    .add(container.getId(), new RandomFragment())
-                    .commit();
+            TextView username = (TextView) header.findViewById(R.id.username);
+            username.setText(user.getUsername());
+
+            ImageView avatar = (ImageView) header.findViewById(R.id.avatar);
+            if (user.getAvatar() != null)
+                Glide.with(getApplicationContext())
+                        .load(user.getAvatar())
+                        .into(avatar);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setMenuItems();
     }
 
     @Override
@@ -111,49 +132,34 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         //manager.openShowFragment(question);
     }
 
+    private void setMenuItems() {
+        Menu menu = navigationView.getMenu();
+        boolean loggedIn = credentialStore.isLoggedIn();
+        menu.setGroupVisible(R.id.unauthenticated_group, !loggedIn);
+        menu.setGroupVisible(R.id.signed_in_group, loggedIn);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        boolean loggedIn = credentialStore.isLoggedIn();
-        /*menu.findItem(R.id.action_logout).setVisible(loggedIn);
-        menu.findItem(R.id.action_login).setVisible(!loggedIn);
-        menu.findItem(R.id.action_register).setVisible(!loggedIn);*/
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-
             case android.R.id.home:
                 drawerLayout.openDrawer(GravityCompat.START);
                 return true;
 
             case R.id.action_create:
                 promptForLogin(toolbar);
-                break;
+                return true;
 
-            /** Auth-related items */
-            case R.id.action_login:
-                Intent loginIntent = new Intent(this, ConnectActivity.class);
-                loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                loginIntent.putExtra(ConnectActivity.REGISTER, false);
-                startActivity(loginIntent);
-                break;
-
-            case R.id.action_register:
-                Intent registerIntent = new Intent(this, ConnectActivity.class);
-                registerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                registerIntent.putExtra(ConnectActivity.REGISTER, true);
-                startActivity(registerIntent);
-                break;
-
-            case R.id.action_logout:
-                credentialStore.delete();
-                Snackbar.make(container, getString(R.string.logout_success), Snackbar.LENGTH_SHORT).show();
-                break;
+            case R.id.action_list:
+                promptForLogin(toolbar);
+                return true;
         }
-        supportInvalidateOptionsMenu();
         return false;
     }
 }

@@ -24,7 +24,7 @@ public interface QuestionService {
 
     @GET("/api/questions")
     Observable<Result<List<Question>>> index(@Header(CACHE_CONTROL_HEADER) String cacheControl,
-                                             @Query("page") int page);
+                                             @Query("from_id") int fromId);
 
     @POST("/api/questions/{id}/answers")
     Observable<Question> answer(@Path("id") int questionId,

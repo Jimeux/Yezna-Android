@@ -15,7 +15,6 @@ import java.io.IOException;
 
 import retrofit.Response;
 import retrofit.Result;
-import rx.Observable;
 
 public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
 
@@ -45,13 +44,14 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
         } else if (response.code() == CREATED) {
             credentialStore.saveToken(response.body());
             view.onRegisterSuccess(username);
+            getUserAfterConnect(username);
         } else if (response.code() == UNPROCESSABLE_ENTITY) {
             getInputErrors(response.errorBody());
         } else
             defaultResponses(response.code());
     }
 
-    public void handleOnNextLogin(Result<AccessToken> result) {
+    public void handleOnNextLogin(Result<AccessToken> result, String username) {
         credentialStore.delete();
         Response<AccessToken> response = result.response();
 
@@ -60,6 +60,7 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
         } else if (response.isSuccess()) {
             credentialStore.saveToken(response.body());
             view.onLoginSuccess();
+            getUserAfterConnect(username);
         } else if (response.code() == UNAUTHORIZED) {
             view.onLoginError();
         } else
@@ -80,10 +81,8 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
     public void login(String username, String password) {
         subscriptions.add(
                 userService.getAccessToken(username, password, "password"),
-                this::handleOnNextLogin,
+                result -> handleOnNextLogin(result, username),
                 this::handleError);
-        /*getUserAfterConnect(username,
-                userService.getAccessToken(username, password, "password"));*/
     }
 
     public void register(String email, String username, String password) {
@@ -91,16 +90,11 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
                 userService.register(new RegistrationRequest(email, username, password)),
                 result -> handleOnNextRegister(result, username),
                 this::handleError);
-        /*getUserAfterConnect(username, userService
-                .register(new UserRequest(email, username, password)));*/
     }
 
-    private void getUserAfterConnect(String username, Observable<AccessToken> observable) {
-        /*Observable<User> userObservable = observable.flatMap(accessToken -> {
-            credentialStore.saveToken(accessToken);
-            return userService.getUser(username);
-        });
-        subscriptions.add(userObservable, this::connectSuccess, this::connectError);*/
+    private void getUserAfterConnect(String username) {
+        subscriptions.add(userService.getUser(username),
+                this::connectSuccess, this::handleError);
     }
 
     private void connectSuccess(User user) {

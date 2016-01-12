@@ -6,6 +6,6 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="30dp"
     android:layout_marginBottom="30dp"
-    android:text="@string/question_list_footer"
+    android:text="@string/no_more_questions"
     android:textColor="@color/grey500"
     android:textSize="16sp" />

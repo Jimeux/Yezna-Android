@@ -12,7 +12,7 @@ import java.util.List;
 import retrofit.Response;
 import retrofit.Result;
 
-public class RandomPresenter extends RxPresenter<RandomPresenter.View> {
+public class PublicQuestionPresenter extends RxPresenter<PublicQuestionPresenter.View> {
 
     public interface View extends RxPresenter.RxView {
         void onPostsRetrieved(List<Question> questions);
@@ -20,14 +20,14 @@ public class RandomPresenter extends RxPresenter<RandomPresenter.View> {
 
     private final QuestionService questionService;
 
-    public RandomPresenter(QuestionService questionService, RxSubscriber subscriptions) {
+    public PublicQuestionPresenter(QuestionService questionService, RxSubscriber subscriptions) {
         super(subscriptions);
         this.questionService = questionService;
     }
 
-    public void loadSummaries(boolean refresh, int page) {
+    public void loadSummaries(boolean refresh, int fromId) {
         subscriptions.add(
-                questionService.index(getCacheHeader(refresh), page),
+                questionService.index(getCacheHeader(refresh), fromId),
                 this::handleOnNext,
                 this::handleError);
     }

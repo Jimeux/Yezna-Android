@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_public_questions"
+        android:orderInCategory="103"
+        android:title="@string/public_questions" />
+
+    <group
+        android:id="@+id/signed_in_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_my_questions"
+            android:orderInCategory="103"
+            android:title="@string/my_questions" />
+        <item
+            android:id="@+id/action_profile"
+            android:orderInCategory="103"
+            android:title="@string/profile" />
+        <item
+            android:id="@+id/action_logout"
+            android:orderInCategory="103"
+            android:title="@string/logout" />
+    </group>
+
+    <group
+        android:id="@+id/unauthenticated_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_register"
+            android:orderInCategory="101"
+            android:title="@string/register" />
+        <item
+            android:id="@+id/action_login"
+            android:orderInCategory="102"
+            android:title="@string/login" />
+    </group>
+</menu>

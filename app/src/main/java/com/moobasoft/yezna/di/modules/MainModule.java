@@ -6,7 +6,7 @@ import com.moobasoft.yezna.rest.services.QuestionService;
 import com.moobasoft.yezna.rest.services.UserService;
 import com.moobasoft.yezna.ui.RxSubscriber;
 import com.moobasoft.yezna.ui.presenters.ConnectPresenter;
-import com.moobasoft.yezna.ui.presenters.RandomPresenter;
+import com.moobasoft.yezna.ui.presenters.PublicQuestionPresenter;
 import com.moobasoft.yezna.ui.presenters.SummaryPresenter;
 
 import dagger.Module;
@@ -26,9 +26,9 @@ public class MainModule {
 
     @PerActivity
     @Provides
-    public RandomPresenter randomPresenter(RxSubscriber subscriptionManager,
+    public PublicQuestionPresenter randomPresenter(RxSubscriber subscriptionManager,
                                            QuestionService questionService) {
-        return new RandomPresenter(questionService, subscriptionManager);
+        return new PublicQuestionPresenter(questionService, subscriptionManager);
     }
 
     @PerActivity
