@@ -81,7 +81,12 @@ public class PublicQuestionFragment extends RxFragment
                 .subscribe(event -> onRefresh());
         Subscription logOutSubscription = eventBus.listen()
                 .ofType(LogOutEvent.class)
-                .subscribe(event -> activateEmptyView(getString(R.string.error_unauthorized)));
+                .subscribe(event -> {
+                    questions = new ArrayList<>();
+                    contentView.removeAllViews();
+                    loading = false;
+                    activateEmptyView(getString(R.string.error_unauthorized));
+                });
 
         subscriptions.add(logOutSubscription);
         subscriptions.add(loginSubscription);

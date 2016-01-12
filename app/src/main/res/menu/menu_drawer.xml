@@ -1,37 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/action_public_questions"
-        android:orderInCategory="103"
-        android:title="@string/public_questions" />
+    <group
+        android:id="@+id/public_group"
+        android:orderInCategory="100"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_public_questions"
+            android:icon="@drawable/ic_public_white_24dp"
+            android:orderInCategory="103"
+            android:title="@string/public_questions" />
+    </group>
 
     <group
         android:id="@+id/signed_in_group"
+        android:orderInCategory="101"
         android:checkableBehavior="single">
         <item
+            android:id="@+id/action_create"
+            android:icon="@drawable/ic_edit_white_24dp"
+            android:orderInCategory="103"
+            android:title="@string/create_question" />
+        <item
             android:id="@+id/action_my_questions"
+            android:icon="@drawable/ic_person_white_24dp"
             android:orderInCategory="103"
             android:title="@string/my_questions" />
         <item
             android:id="@+id/action_profile"
+            android:icon="@drawable/ic_settings_white_24dp"
             android:orderInCategory="103"
             android:title="@string/profile" />
+    </group>
+
+    <group
+        android:id="@+id/sign_out_group"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/action_logout"
+            android:icon="@drawable/ic_exit_to_app_white_24dp"
             android:orderInCategory="103"
             android:title="@string/logout" />
     </group>
 
     <group
         android:id="@+id/unauthenticated_group"
+        android:orderInCategory="102"
         android:checkableBehavior="single">
         <item
             android:id="@+id/action_register"
             android:orderInCategory="101"
+            android:icon="@drawable/ic_add_circle_white_24dp"
             android:title="@string/register" />
         <item
             android:id="@+id/action_login"
+            android:icon="@drawable/ic_person_white_24dp"
             android:orderInCategory="102"
             android:title="@string/login" />
     </group>

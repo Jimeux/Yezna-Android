@@ -165,6 +165,8 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         Menu menu = navigationView.getMenu();
         boolean loggedIn = credentialStore.isLoggedIn();
         menu.setGroupVisible(R.id.unauthenticated_group, !loggedIn);
+        menu.setGroupVisible(R.id.public_group, loggedIn);
+        menu.setGroupVisible(R.id.sign_out_group, loggedIn);
         menu.setGroupVisible(R.id.signed_in_group, loggedIn);
     }
 

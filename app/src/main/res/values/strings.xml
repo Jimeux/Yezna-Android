@@ -34,5 +34,7 @@
     <string name="my_questions">My questions</string>
     <string name="profile">Profile</string>
     <string name="public_questions">Public questions</string>
+    <string name="create_question">Ask a question</string>
+    <string name="not_signed_in">Not signed in</string>
 
 </resources>

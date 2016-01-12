@@ -9,11 +9,11 @@
 
     <ImageView
         android:layout_width="wrap_content"
-        android:layout_height="30dp"
+        android:layout_height="27dp"
         android:adjustViewBounds="true"
         android:layout_marginBottom="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginLeft="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
         android:layout_marginRight="16dp"
         android:src="@drawable/yezna_logo"/>
 
@@ -23,7 +23,7 @@
         android:layout_height="64dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="0dp"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="20dp"
         android:layout_marginRight="16dp"/>
 
     <TextView
@@ -31,10 +31,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
         android:layout_marginRight="16dp"
-        android:text="Not signed in"
+        android:text="@string/not_signed_in"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
 
 </LinearLayout>

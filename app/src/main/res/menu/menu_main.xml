@@ -3,34 +3,16 @@
 
     <item
         android:id="@+id/action_list"
-        android:title="My questions"
+        android:title="@string/my_questions"
         android:orderInCategory="100"
         android:icon="@drawable/ic_person_white_24dp"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_create"
-        android:title="Ask a question"
+        android:title="@string/create_question"
         android:orderInCategory="101"
         android:icon="@drawable/ic_edit_white_24dp"
         app:showAsAction="ifRoom" />
-
-<!--    <group android:id="@+id/connect_actions">
-        <item
-            android:id="@+id/action_register"
-            android:orderInCategory="101"
-            android:title="@string/register"
-            app:showAsAction="never" />
-        <item
-            android:id="@+id/action_login"
-            android:orderInCategory="102"
-            android:title="@string/login"
-            app:showAsAction="never" />
-        <item
-            android:id="@+id/action_logout"
-            android:orderInCategory="103"
-            android:title="@string/logout"
-            app:showAsAction="never" />
-    </group>-->
 
 </menu>
