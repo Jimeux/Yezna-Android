@@ -18,25 +18,34 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.moobasoft.yezna.EventBus;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.rest.models.User;
+import com.moobasoft.yezna.ui.activities.ConnectActivity.LoginEvent;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
 import com.moobasoft.yezna.ui.fragments.PublicQuestionFragment;
 
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
 import static com.moobasoft.yezna.ui.SummaryAdapter.SummaryClickListener;
 
 public class MainActivity extends BaseActivity implements SummaryClickListener {
 
-    private FragmentManager fragmentManager;
-
-    @Bind(R.id.drawer_layout)   DrawerLayout drawerLayout;
+    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
     @Bind(R.id.navigation_view) NavigationView navigationView;
-    @Bind(R.id.toolbar)         Toolbar toolbar;
-    @Bind(R.id.container)       ViewGroup container;
+    @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.container) ViewGroup container;
+
+    @Inject EventBus eventBus;
+
+    private FragmentManager fragmentManager;
+    private CompositeSubscription subscriptions;
 
     @Override
     protected void onCreate(@Nullable Bundle state) {
@@ -54,6 +63,31 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
             fragmentManager.beginTransaction()
                     .add(container.getId(), new PublicQuestionFragment())
                     .commit();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        subscribeToEvents();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        subscriptions.clear();
+    }
+
+    private void subscribeToEvents() {
+        subscriptions = new CompositeSubscription();
+
+        Subscription loginSubscription = eventBus.listen()
+                .ofType(LoginEvent.class)
+                .subscribe(event -> {
+                    setMenuItems();
+                    loadUserDetails();
+                });
+
+        subscriptions.add(loginSubscription);
     }
 
     private void initNavigationDrawer() {
@@ -78,6 +112,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                     credentialStore.delete();
                     Snackbar.make(container, getString(R.string.logout_success), Snackbar.LENGTH_SHORT).show();
                     setMenuItems();
+                    eventBus.send(new LogOutEvent());
                     break;
             }
             drawerLayout.closeDrawers();
@@ -122,12 +157,6 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        setMenuItems();
-    }
-
-    @Override
     public void onSummaryClicked(Question question) {
         //manager.openShowFragment(question);
     }
@@ -162,4 +191,6 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         }
         return false;
     }
+
+    public static class LogOutEvent {}
 }

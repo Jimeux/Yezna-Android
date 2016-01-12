@@ -34,7 +34,7 @@
         android:layout_marginBottom="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:text="hello"
+        android:text="Not signed in"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
 
 </LinearLayout>

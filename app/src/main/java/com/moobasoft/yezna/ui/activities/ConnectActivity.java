@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.moobasoft.yezna.App;
+import com.moobasoft.yezna.EventBus;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.di.components.DaggerMainComponent;
 import com.moobasoft.yezna.di.modules.MainModule;
@@ -34,6 +35,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     public static final String REGISTER = "form";
 
     @Inject ConnectPresenter presenter;
+    @Inject EventBus eventBus;
 
     @Bind(R.id.progress_bar)    ProgressBar progressBar;
     @Bind(R.id.btn_primary)     Button primaryBtn;
@@ -127,6 +129,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
         setProcessing(false);
         Toast.makeText(this, getString(R.string.login_success), Toast.LENGTH_SHORT)
                 .show();
+        eventBus.send(new LoginEvent());
         finish();
     }
 
@@ -165,4 +168,6 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
         processingView.setVisibility(processing ? VISIBLE : GONE);
         primaryBtn.setVisibility(processing ? GONE : VISIBLE);
     }
+
+    public static class LoginEvent {}
 }

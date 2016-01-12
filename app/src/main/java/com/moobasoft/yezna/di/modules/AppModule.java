@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.moobasoft.yezna.App;
+import com.moobasoft.yezna.EventBus;
 import com.moobasoft.yezna.rest.auth.CredentialStore;
 
 import javax.inject.Singleton;
@@ -21,6 +22,12 @@ public class AppModule {
 
     public AppModule(App application) {
         this.application = application;
+    }
+
+    @Provides
+    @Singleton
+    EventBus provideEventBus() {
+        return new EventBus();
     }
 
     @Provides

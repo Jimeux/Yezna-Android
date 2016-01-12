@@ -11,8 +11,10 @@ import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 
+import com.moobasoft.yezna.EventBus;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.models.Question;
+import com.moobasoft.yezna.ui.activities.MainActivity.LogOutEvent;
 import com.moobasoft.yezna.ui.fragments.base.RxFragment;
 import com.moobasoft.yezna.ui.presenters.PublicQuestionPresenter;
 import com.moobasoft.yezna.ui.views.QuestionView;
@@ -23,8 +25,11 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
 import static android.view.View.VISIBLE;
+import static com.moobasoft.yezna.ui.activities.ConnectActivity.LoginEvent;
 import static com.moobasoft.yezna.ui.views.QuestionView.QuestionClickListener;
 
 public class PublicQuestionFragment extends RxFragment
@@ -47,11 +52,45 @@ public class PublicQuestionFragment extends RxFragment
      */
     private boolean loading;
 
-    @Inject
-    PublicQuestionPresenter presenter;
+    private CompositeSubscription subscriptions;
+
+    @Inject PublicQuestionPresenter presenter;
+    @Inject EventBus eventBus;
 
     public PublicQuestionFragment() {
     }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        subscribeToEvents();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        subscriptions.clear();
+    }
+
+    private void subscribeToEvents() {
+        subscriptions = new CompositeSubscription();
+
+        Subscription loginSubscription = eventBus.listen()
+                .ofType(LoginEvent.class)
+                .subscribe(event -> onRefresh());
+        Subscription logOutSubscription = eventBus.listen()
+                .ofType(LogOutEvent.class)
+                .subscribe(event -> activateEmptyView(getString(R.string.error_unauthorized)));
+
+        subscriptions.add(logOutSubscription);
+        subscriptions.add(loginSubscription);
+    }
+
+
+
+
+
 
     @Override
     public void onCreate(@Nullable Bundle state) {
