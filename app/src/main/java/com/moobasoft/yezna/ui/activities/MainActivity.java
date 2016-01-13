@@ -78,14 +78,18 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     }
 
     private void subscribeToEvents() {
-        Subscription loginEventSubscription = eventBus.listen()
-                .ofType(LoginEvent.class)
+        Subscription loginEvent = eventBus
+                .listenFor(LoginEvent.class)
                 .subscribe(event -> {
                     setMenuItems();
                     loadUserDetails();
                 });
 
-        eventSubscriptions = new CompositeSubscription(loginEventSubscription);
+        Subscription loginPromptEvent = eventBus
+                .listenFor(LoginPromptEvent.class)
+                .subscribe(event -> promptForLogin());
+
+        eventSubscriptions = new CompositeSubscription(loginEvent, loginPromptEvent);
     }
 
     private void initNavigationDrawer() {
@@ -182,15 +186,31 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 return true;
 
             case R.id.action_create:
-                promptForLogin(toolbar);
+                promptForLogin();
                 return true;
 
             case R.id.action_list:
-                promptForLogin(toolbar);
+                promptForLogin();
                 return true;
         }
         return false;
     }
 
-    public static class LogOutEvent {}
+    public void promptForLogin() {
+        Snackbar.make(toolbar, getString(R.string.error_unauthorized), Snackbar.LENGTH_LONG)
+                .setActionTextColor(getResources().getColor(R.color.green400))
+                .setAction(getString(R.string.login), v -> {
+                    Intent intent = new Intent(MainActivity.this, ConnectActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(ConnectActivity.REGISTER, false);
+                    startActivity(intent);
+                })
+                .show();
+    }
+
+    public static class LogOutEvent {
+    }
+
+    public static class LoginPromptEvent {
+    }
 }

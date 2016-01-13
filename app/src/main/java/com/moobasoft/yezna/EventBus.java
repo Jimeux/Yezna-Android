@@ -14,7 +14,7 @@ public class EventBus {
             bus.onNext(o);
     }
 
-    public Observable<Object> listen() {
-        return bus;
+    public <E> Observable<E> listenFor(Class<E> eventClass) {
+        return bus.ofType(eventClass);
     }
 }

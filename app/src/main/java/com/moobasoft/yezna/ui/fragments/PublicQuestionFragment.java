@@ -11,10 +11,10 @@ import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 
-import com.moobasoft.yezna.EventBus;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.models.Question;
-import com.moobasoft.yezna.ui.activities.MainActivity.LogOutEvent;
+import com.moobasoft.yezna.ui.activities.ConnectActivity;
+import com.moobasoft.yezna.ui.activities.MainActivity;
 import com.moobasoft.yezna.ui.fragments.base.RxFragment;
 import com.moobasoft.yezna.ui.presenters.PublicQuestionPresenter;
 import com.moobasoft.yezna.ui.views.QuestionView;
@@ -29,14 +29,12 @@ import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
 import static android.view.View.VISIBLE;
-import static com.moobasoft.yezna.ui.activities.ConnectActivity.LoginEvent;
 import static com.moobasoft.yezna.ui.views.QuestionView.QuestionClickListener;
 
 public class PublicQuestionFragment extends RxFragment
         implements PublicQuestionPresenter.View, QuestionClickListener {
 
     @Inject PublicQuestionPresenter presenter;
-    @Inject EventBus eventBus;
 
     public static final String QUESTIONS_KEY = "questions_key";
     public static final int PER_PAGE = 6;
@@ -53,36 +51,6 @@ public class PublicQuestionFragment extends RxFragment
     private boolean loading;
 
     public PublicQuestionFragment() {
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        subscribeToEvents();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        eventSubscriptions.clear();
-    }
-
-    private void subscribeToEvents() {
-        Subscription loginEventSubscription = eventBus.listen()
-                .ofType(LoginEvent.class)
-                .subscribe(event -> onRefresh());
-
-        Subscription logOutEventSubscription = eventBus.listen()
-                .ofType(LogOutEvent.class)
-                .subscribe(event -> {
-                    questions.clear();
-                    contentView.removeAllViews();
-                    loading = false;
-                    activateEmptyView(getString(R.string.error_unauthorized));
-                });
-
-        eventSubscriptions = new CompositeSubscription(
-                loginEventSubscription, logOutEventSubscription);
     }
 
     @Override
@@ -120,9 +88,21 @@ public class PublicQuestionFragment extends RxFragment
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        subscribeToEvents();
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
         state.putParcelableArrayList(QUESTIONS_KEY, questions);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        eventSubscriptions.clear();
     }
 
     @Override
@@ -130,6 +110,19 @@ public class PublicQuestionFragment extends RxFragment
         presenter.releaseView();
         ButterKnife.unbind(this);
         super.onDestroyView();
+    }
+
+    private void subscribeToEvents() {
+        Subscription loginEventSubscription =
+                eventBus.listenFor(ConnectActivity.LoginEvent.class)
+                        .subscribe(event -> onRefresh());
+
+        Subscription logOutEventSubscription =
+                eventBus.listenFor(MainActivity.LogOutEvent.class)
+                        .subscribe(event -> onRefresh());
+
+        eventSubscriptions = new CompositeSubscription(
+                loginEventSubscription, logOutEventSubscription);
     }
 
     private void loadPosts(boolean refresh) {
@@ -162,10 +155,14 @@ public class PublicQuestionFragment extends RxFragment
 
     @Override
     public void onAnswerQuestion(Question question, View view, boolean yes) {
-        presenter.answerQuestion(question.getId(), yes);
-        cardDeck.pop();
-        if (questions.size() == Math.ceil(PER_PAGE / 2.0))
-            loadPosts(false);
+        if (!credentialStore.isLoggedIn())
+            promptForLogin();
+        else {
+            presenter.answerQuestion(question.getId(), yes);
+            cardDeck.pop();
+            if (questions.size() == Math.ceil(PER_PAGE / 2.0))
+                loadPosts(false);
+        }
     }
 
     @Override
@@ -173,12 +170,6 @@ public class PublicQuestionFragment extends RxFragment
         questions.clear();
         contentView.removeAllViews();
         loadPosts(true);
-    }
-
-    @Override
-    public void promptForLogin() {
-        super.promptForLogin();
-        activateErrorView(getString(R.string.error_unauthorized));
     }
 
     class CardDeck {

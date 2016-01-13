@@ -8,7 +8,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moobasoft.yezna.App;
-import com.moobasoft.yezna.EventBus;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.di.components.DaggerMainComponent;
 import com.moobasoft.yezna.di.modules.MainModule;
@@ -28,10 +27,11 @@ import static android.view.View.VISIBLE;
 
 public class ConnectActivity extends BaseActivity implements ConnectPresenter.View {
 
+    public static class LoginEvent {}
+
     public static final String REGISTER = "form";
 
     @Inject ConnectPresenter presenter;
-    @Inject EventBus eventBus;
 
     @Bind(R.id.btn_primary)     TextView primaryBtn;
     @Bind(R.id.btn_secondary)   TextView secondaryBtn;
@@ -140,6 +140,8 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
         usernameEt.setError(getString(R.string.login_error));
     }
 
+    @Override public void promptForLogin() {}
+
     @Override
     public void onError(int error) {
         setProcessing(false);
@@ -162,13 +164,11 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
 
         if (processing) {
             primaryBtn.setText(getString(R.string.loading));
-            primaryBtn.setBackgroundColor(getResources().getColor(R.color.red300));
+            primaryBtn.setBackgroundColor(getResources(). getColor(R.color.red300));
         } else {
             int stringId = isLoginForm() ? R.string.login : R.string.register;
             primaryBtn.setText(getString(stringId));
             primaryBtn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
     }
-
-    public static class LoginEvent {}
 }

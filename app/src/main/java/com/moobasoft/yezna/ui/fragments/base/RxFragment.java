@@ -7,13 +7,17 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.moobasoft.yezna.App;
+import com.moobasoft.yezna.EventBus;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.di.components.DaggerMainComponent;
 import com.moobasoft.yezna.di.components.MainComponent;
 import com.moobasoft.yezna.di.modules.MainModule;
-import com.moobasoft.yezna.ui.activities.base.BaseActivity;
+import com.moobasoft.yezna.rest.auth.CredentialStore;
+import com.moobasoft.yezna.ui.activities.MainActivity.LoginPromptEvent;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -21,6 +25,10 @@ import butterknife.OnClick;
 import static android.view.View.VISIBLE;
 
 public abstract class RxFragment extends Fragment {
+
+    @Inject protected EventBus eventBus;
+    @Inject protected CredentialStore credentialStore;
+
     @Bind(R.id.content)      protected ViewGroup contentView;
     @Bind(R.id.loading_view) protected ViewGroup loadingView;
     @Bind(R.id.empty_view)   protected ViewGroup emptyView;
@@ -38,7 +46,7 @@ public abstract class RxFragment extends Fragment {
     }
 
     public void promptForLogin() {
-        ((BaseActivity) getActivity()).promptForLogin();
+        eventBus.send(new LoginPromptEvent());
     }
 
     protected MainComponent getComponent() {

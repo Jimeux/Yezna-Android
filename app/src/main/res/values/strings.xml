@@ -37,6 +37,6 @@
     <string name="create_question">Ask a question</string>
     <string name="not_signed_in">Not signed in</string>
     <string name="login_prompt">Already a member? Sign in.</string>
-    <string name="register_prompt">Create a new account</string>
+    <string name="register_prompt">Create a new account.</string>
 
 </resources>
