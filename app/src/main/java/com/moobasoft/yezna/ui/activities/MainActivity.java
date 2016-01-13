@@ -45,7 +45,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     @Inject EventBus eventBus;
 
     private FragmentManager fragmentManager;
-    private CompositeSubscription subscriptions;
+    private CompositeSubscription eventSubscriptions;
 
     @Override
     protected void onCreate(@Nullable Bundle state) {
@@ -74,20 +74,18 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     @Override
     protected void onStop() {
         super.onStop();
-        subscriptions.clear();
+        eventSubscriptions.clear();
     }
 
     private void subscribeToEvents() {
-        subscriptions = new CompositeSubscription();
-
-        Subscription loginSubscription = eventBus.listen()
+        Subscription loginEventSubscription = eventBus.listen()
                 .ofType(LoginEvent.class)
                 .subscribe(event -> {
                     setMenuItems();
                     loadUserDetails();
                 });
 
-        subscriptions.add(loginSubscription);
+        eventSubscriptions = new CompositeSubscription(loginEventSubscription);
     }
 
     private void initNavigationDrawer() {

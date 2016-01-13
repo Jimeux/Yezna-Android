@@ -1,14 +1,10 @@
 package com.moobasoft.yezna.ui.activities;
 
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.view.ViewCompat;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moobasoft.yezna.App;
@@ -37,10 +33,8 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     @Inject ConnectPresenter presenter;
     @Inject EventBus eventBus;
 
-    @Bind(R.id.progress_bar)    ProgressBar progressBar;
-    @Bind(R.id.btn_primary)     Button primaryBtn;
-    @Bind(R.id.btn_secondary)   Button secondaryBtn;
-    @Bind(R.id.processing_view) ViewGroup processingView;
+    @Bind(R.id.btn_primary)     TextView primaryBtn;
+    @Bind(R.id.btn_secondary)   TextView secondaryBtn;
     @Bind(R.id.email_label)     View emailLabel;
     @Bind(R.id.email_et)        EditText emailEt;
     @Bind(R.id.username_et)     EditText usernameEt;
@@ -77,12 +71,12 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
             emailLabel.setVisibility(VISIBLE);
             emailEt.setVisibility(VISIBLE);
             primaryBtn.setText(getString(R.string.register));
-            secondaryBtn.setText(getString(R.string.login));
+            secondaryBtn.setText(getString(R.string.login_prompt));
         } else {
             emailLabel.setVisibility(GONE);
             emailEt.setVisibility(GONE);
             primaryBtn.setText(getString(R.string.login));
-            secondaryBtn.setText(getString(R.string.register));
+            secondaryBtn.setText(getString(R.string.register_prompt));
         }
     }
 
@@ -106,9 +100,9 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
         boolean isRegisterForm = getIntent().getBooleanExtra(REGISTER, true);
         switchForms(isRegisterForm);
 
-        ViewCompat.setTranslationZ(progressBar, 5);
-        progressBar.getIndeterminateDrawable()
-                .setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
+        //ViewCompat.setTranslationZ(progressBar, 5);
+        //progressBar.getIndeterminateDrawable()
+          //      .setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
     }
 
     private void initialiseInjector() {
@@ -125,7 +119,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     }
 
     @Override
-    public void onLoginSuccess() {
+    public void onLogin() {
         setProcessing(false);
         Toast.makeText(this, getString(R.string.login_success), Toast.LENGTH_SHORT)
                 .show();
@@ -134,7 +128,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     }
 
     @Override
-    public void onRegisterSuccess(String username) {
+    public void onRegister(String username) {
         setProcessing(false);
         Toast.makeText(this, getString(R.string.register_success, username), Toast.LENGTH_LONG).show();
         finish();
@@ -143,7 +137,6 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     @Override
     public void onLoginError() {
         setProcessing(false);
-        //FIXME: Shows as a blank white box on API 10
         usernameEt.setError(getString(R.string.login_error));
     }
 
@@ -164,9 +157,17 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     }
 
     private void setProcessing(boolean processing) {
-        for (EditText e : inputFields) e.setEnabled(!processing);
-        processingView.setVisibility(processing ? VISIBLE : GONE);
-        primaryBtn.setVisibility(processing ? GONE : VISIBLE);
+        for (EditText e : inputFields)
+            e.setEnabled(!processing);
+
+        if (processing) {
+            primaryBtn.setText(getString(R.string.loading));
+            primaryBtn.setBackgroundColor(getResources().getColor(R.color.red300));
+        } else {
+            int stringId = isLoginForm() ? R.string.login : R.string.register;
+            primaryBtn.setText(getString(stringId));
+            primaryBtn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        }
     }
 
     public static class LoginEvent {}

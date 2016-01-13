@@ -35,13 +35,13 @@ import static com.moobasoft.yezna.ui.views.QuestionView.QuestionClickListener;
 public class PublicQuestionFragment extends RxFragment
         implements PublicQuestionPresenter.View, QuestionClickListener {
 
-    public static final String QUESTIONS_KEY = "questions_key";
+    @Inject PublicQuestionPresenter presenter;
+    @Inject EventBus eventBus;
 
+    public static final String QUESTIONS_KEY = "questions_key";
     public static final int PER_PAGE = 6;
 
-    /**
-     * A data structure to store questions returned from the server.
-     */
+    private CompositeSubscription eventSubscriptions;
     private ArrayList<Question> questions;
     /**
      * Manages question views as an animated deck of cards.
@@ -52,14 +52,8 @@ public class PublicQuestionFragment extends RxFragment
      */
     private boolean loading;
 
-    private CompositeSubscription subscriptions;
-
-    @Inject PublicQuestionPresenter presenter;
-    @Inject EventBus eventBus;
-
     public PublicQuestionFragment() {
     }
-
 
     @Override
     public void onStart() {
@@ -70,32 +64,26 @@ public class PublicQuestionFragment extends RxFragment
     @Override
     public void onStop() {
         super.onStop();
-        subscriptions.clear();
+        eventSubscriptions.clear();
     }
 
     private void subscribeToEvents() {
-        subscriptions = new CompositeSubscription();
-
-        Subscription loginSubscription = eventBus.listen()
+        Subscription loginEventSubscription = eventBus.listen()
                 .ofType(LoginEvent.class)
                 .subscribe(event -> onRefresh());
-        Subscription logOutSubscription = eventBus.listen()
+
+        Subscription logOutEventSubscription = eventBus.listen()
                 .ofType(LogOutEvent.class)
                 .subscribe(event -> {
-                    questions = new ArrayList<>();
+                    questions.clear();
                     contentView.removeAllViews();
                     loading = false;
                     activateEmptyView(getString(R.string.error_unauthorized));
                 });
 
-        subscriptions.add(logOutSubscription);
-        subscriptions.add(loginSubscription);
+        eventSubscriptions = new CompositeSubscription(
+                loginEventSubscription, logOutEventSubscription);
     }
-
-
-
-
-
 
     @Override
     public void onCreate(@Nullable Bundle state) {
@@ -182,6 +170,8 @@ public class PublicQuestionFragment extends RxFragment
 
     @Override
     public void onRefresh() {
+        questions.clear();
+        contentView.removeAllViews();
         loadPosts(true);
     }
 
@@ -231,6 +221,10 @@ public class PublicQuestionFragment extends RxFragment
                 View card = container.getChildAt(position);
                 ViewCompat.setTranslationZ(card, 4.0F - (position + 1));
                 card.animate().setDuration(220).rotation(1.0F - (position + 1)).start();
+
+                boolean isOnTop = (position == 0);
+                card.findViewById(R.id.yes_btn).setEnabled(isOnTop);
+                card.findViewById(R.id.no_btn).setEnabled(isOnTop);
             }
         }
 
@@ -291,12 +285,13 @@ public class PublicQuestionFragment extends RxFragment
          */
         private void popAndPushNext() {
             questions.remove(0);
-            container.removeViewAt(0);
+            container.post(() -> {
+                container.removeViewAt(0);
+                if (questions.size() > 2)
+                    push(questions.get(2), false);
 
-            if (questions.size() > 2)
-                push(questions.get(2), false);
-
-            resetCards();
+                resetCards();
+            });
         }
 
         /**

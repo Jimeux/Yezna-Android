@@ -38,7 +38,7 @@ public abstract class RxFragment extends Fragment {
     }
 
     public void promptForLogin() {
-        ((BaseActivity) getActivity()).promptForLogin(null);
+        ((BaseActivity) getActivity()).promptForLogin();
     }
 
     protected MainComponent getComponent() {

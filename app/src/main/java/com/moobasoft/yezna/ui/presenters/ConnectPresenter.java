@@ -15,12 +15,13 @@ import java.io.IOException;
 
 import retrofit.Response;
 import retrofit.Result;
+import rx.Observable;
 
 public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
 
     public interface View extends RxPresenter.RxView {
-        void onLoginSuccess();
-        void onRegisterSuccess(String username);
+        void onLogin();
+        void onRegister(String username);
         void onLoginError();
         void onRegistrationError(String username, String email, String password);
     }
@@ -36,22 +37,20 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
         this.credentialStore = credentialStore;
     }
 
-    public void handleOnNextRegister(Result<AccessToken> result, String username) {
+    public void handleOnNextRegister(Result<AccessToken> result) {
         Response<AccessToken> response = result.response();
 
         if (result.isError()) {
             handleError(result.error());
         } else if (response.code() == CREATED) {
             credentialStore.saveToken(response.body());
-            view.onRegisterSuccess(username);
-            getUserAfterConnect(username);
         } else if (response.code() == UNPROCESSABLE_ENTITY) {
             getInputErrors(response.errorBody());
         } else
             defaultResponses(response.code());
     }
 
-    public void handleOnNextLogin(Result<AccessToken> result, String username) {
+    public void handleOnNextLogin(Result<AccessToken> result) {
         credentialStore.delete();
         Response<AccessToken> response = result.response();
 
@@ -59,8 +58,6 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
             handleError(result.error());
         } else if (response.isSuccess()) {
             credentialStore.saveToken(response.body());
-            view.onLoginSuccess();
-            getUserAfterConnect(username);
         } else if (response.code() == UNAUTHORIZED) {
             view.onLoginError();
         } else
@@ -71,35 +68,42 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
         try {
             RegistrationError error = RegistrationError.CONVERTER.convert(errorBody);
             view.onRegistrationError(error.getUsername(),
-                                     error.getEmail(),
-                                     error.getPassword());
+                    error.getEmail(),
+                    error.getPassword());
         } catch (IOException e) {
             view.onError(R.string.error_default);
         }
     }
 
     public void login(String username, String password) {
-        subscriptions.add(
-                userService.getAccessToken(username, password, "password"),
-                result -> handleOnNextLogin(result, username),
-                this::handleError);
+        Observable<Result<AccessToken>> observable =
+                userService.getAccessToken(username, password, "password")
+                .doOnNext(this::handleOnNextLogin);
+        getUserAfterConnect(true, username, observable);
     }
 
     public void register(String email, String username, String password) {
-        subscriptions.add(
-                userService.register(new RegistrationRequest(email, username, password)),
-                result -> handleOnNextRegister(result, username),
-                this::handleError);
+        Observable<Result<AccessToken>> observable =
+                userService.register(new RegistrationRequest(email, username, password))
+                        .doOnNext(this::handleOnNextRegister);
+        getUserAfterConnect(true, username, observable);
     }
 
-    private void getUserAfterConnect(String username) {
-        subscriptions.add(userService.getUser(username),
-                this::connectSuccess, this::handleError);
+    private void getUserAfterConnect(boolean isLogin, String username,
+                                     Observable<Result<AccessToken>> observable) {
+        Observable<User> userObservable = observable.flatMap(accessTokenResult -> {
+            return userService.getUser(username); //TODO: Retries
+        });
+
+        subscriptions.add(userObservable,
+                user -> handleUserRetrieved(user, isLogin), this::handleError);
     }
 
-    private void connectSuccess(User user) {
+    private void handleUserRetrieved(User user, boolean isLogin) {
         credentialStore.saveUser(user);
-        view.onLoginSuccess();
+        if (isLogin)
+            view.onLogin();
+        else
+            view.onRegister(user.getUsername());
     }
-
 }

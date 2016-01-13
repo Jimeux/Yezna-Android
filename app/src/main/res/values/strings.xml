@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Yezna</string>
 
-    <string name="login_success">Signed in successfully.</string>
-    <string name="login_error">Couldn\'t sign in.</string>
+    <string name="login_success">Signed in successfully</string>
+    <string name="login_error">Couldn\'t sign in</string>
     <string name="register_success">Welcome to Yezna, %1$s</string>
 
     <string name="register">Register</string>
@@ -12,29 +12,31 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
 
-    <string name="logout_success">Signed out successfully.</string>
+    <string name="logout_success">Signed out successfully</string>
     <string name="logout">Sign out</string>
 
     <!-- Questions -->
-    <string name="no_more_questions">No more questions.</string>
-    <string name="no_questions_found">No questions found.</string>
+    <string name="no_more_questions">No more questions</string>
+    <string name="no_questions_found">No questions found</string>
     <!-- Answers -->
     <string name="answer_error">You already answered that question!</string>
 
     <!-- General errors -->
-    <string name="error_default">An unexpected error occurred.</string>
-    <string name="error_unauthorized">Please sign in.</string>
-    <string name="error_offline">Currently offline.</string>
-    <string name="error_timeout">Connection timed out.</string>
-    <string name="error_server">Can\'t connect to server.</string>
+    <string name="error_default">An unexpected error occurred</string>
+    <string name="error_unauthorized">Please sign in</string>
+    <string name="error_offline">Currently offline</string>
+    <string name="error_timeout">Connection timed out</string>
+    <string name="error_server">Can\'t connect to server</string>
 
     <!-- Status messages -->
-    <string name="loading_list">Loading…</string>
+    <string name="loading">Loading…</string>
     <string name="no_answers">No answers yet</string>
     <string name="my_questions">My questions</string>
     <string name="profile">Profile</string>
     <string name="public_questions">Public questions</string>
     <string name="create_question">Ask a question</string>
     <string name="not_signed_in">Not signed in</string>
+    <string name="login_prompt">Already a member? Sign in.</string>
+    <string name="register_prompt">Create a new account</string>
 
 </resources>

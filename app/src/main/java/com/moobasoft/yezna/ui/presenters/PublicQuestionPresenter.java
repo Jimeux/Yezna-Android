@@ -35,10 +35,10 @@ public class PublicQuestionPresenter extends RxPresenter<PublicQuestionPresenter
     public void answerQuestion(int questionId, boolean isYes) {
         subscriptions.add(questionService.answer(questionId, new AnswerRequest(isYes)),
                 question -> {},
-                this::fuckYou);
+                this::handleAnswerError);
     }
 
-    private void fuckYou(Throwable throwable) {
+    private void handleAnswerError(Throwable throwable) {
         if (throwable.getMessage() != null && throwable.getMessage().contains("422"))
             view.onError(R.string.answer_error);
         else super.handleError(throwable);
