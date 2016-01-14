@@ -27,6 +27,6 @@ public interface QuestionService {
                                              @Query("from_id") int fromId);
 
     @POST("/api/questions/{id}/answers")
-    Observable<Question> answer(@Path("id") int questionId,
+    Observable<Result<Question>> answer(@Path("id") int questionId,
                                 @Body AnswerRequest answerRequest);
 }

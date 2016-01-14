@@ -87,9 +87,14 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
         Subscription loginPromptEvent = eventBus
                 .listenFor(LoginPromptEvent.class)
-                .subscribe(event -> promptForLogin());
+                .subscribe(this::promptForLogin);
 
-        eventSubscriptions = new CompositeSubscription(loginEvent, loginPromptEvent);
+        Subscription logoutEvent = eventBus
+                .listenFor(LogOutEvent.class)
+                .subscribe(this::clearUserDetails);
+
+        eventSubscriptions = new CompositeSubscription(
+                loginEvent, loginPromptEvent, logoutEvent);
     }
 
     private void initNavigationDrawer() {
@@ -141,6 +146,14 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         loadUserDetails();
     }
 
+    private void clearUserDetails(LogOutEvent event) {
+        View header = navigationView.getHeaderView(0);
+        TextView username = (TextView) header.findViewById(R.id.username);
+        username.setText(getString(R.string.not_signed_in));
+        ImageView avatar = (ImageView) header.findViewById(R.id.avatar);
+        avatar.setImageDrawable(null);
+    }
+
     private void loadUserDetails() {
         User user = credentialStore.loadUser();
 
@@ -148,7 +161,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
             View header = navigationView.getHeaderView(0);
 
             TextView username = (TextView) header.findViewById(R.id.username);
-            username.setText(user.getUsername());
+            username.setText(getString(R.string.signed_in_as, user.getUsername()));
 
             ImageView avatar = (ImageView) header.findViewById(R.id.avatar);
             if (user.getAvatar() != null)
@@ -186,18 +199,21 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 return true;
 
             case R.id.action_create:
-                promptForLogin();
+                promptForLogin(null);
                 return true;
 
             case R.id.action_list:
-                promptForLogin();
+                promptForLogin(null);
                 return true;
         }
         return false;
     }
 
-    public void promptForLogin() {
-        Snackbar.make(toolbar, getString(R.string.error_unauthorized), Snackbar.LENGTH_LONG)
+    public void promptForLogin(LoginPromptEvent event) {
+        String message = (event != null && event.message != null) ?
+                event.getMessage() : getString(R.string.error_unauthorized);
+
+        Snackbar.make(toolbar, message, Snackbar.LENGTH_LONG)
                 .setActionTextColor(getResources().getColor(R.color.green400))
                 .setAction(getString(R.string.login), v -> {
                     Intent intent = new Intent(MainActivity.this, ConnectActivity.class);
@@ -212,5 +228,17 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     }
 
     public static class LoginPromptEvent {
+        private String message;
+
+        public LoginPromptEvent() {
+        }
+
+        public LoginPromptEvent(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
 }

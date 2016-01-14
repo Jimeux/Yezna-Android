@@ -78,8 +78,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginTop="10dp"
-                android:clickable="true"
-                android:foreground="?android:attr/selectableItemBackground"
                 app:cardElevation="1dp">
                 <TextView
                     android:id="@+id/btn_primary"
@@ -87,6 +85,7 @@
                     android:layout_height="wrap_content"
                     android:background="@color/colorPrimary"
                     android:clickable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
                     android:paddingBottom="6dp"
                     android:paddingLeft="22dp"
                     android:paddingRight="22dp"

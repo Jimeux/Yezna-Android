@@ -4,59 +4,60 @@ import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.rest.requests.AnswerRequest;
 import com.moobasoft.yezna.rest.services.QuestionService;
-import com.moobasoft.yezna.ui.RxSubscriber;
+import com.moobasoft.yezna.ui.RxSchedulers;
 import com.moobasoft.yezna.ui.presenters.base.RxPresenter;
 
 import java.util.List;
 
-import retrofit.Response;
 import retrofit.Result;
+import rx.Observable;
 
 public class PublicQuestionPresenter extends RxPresenter<PublicQuestionPresenter.View> {
 
     public interface View extends RxPresenter.RxView {
-        void onPostsRetrieved(List<Question> questions);
+        void onQuestionsRetrieved(List<Question> questions);
     }
 
     private final QuestionService questionService;
 
-    public PublicQuestionPresenter(QuestionService questionService, RxSubscriber subscriptions) {
+    public PublicQuestionPresenter(QuestionService questionService, RxSchedulers subscriptions) {
         super(subscriptions);
         this.questionService = questionService;
     }
 
     public void loadSummaries(boolean refresh, int fromId) {
-        subscriptions.add(
-                questionService.index(getCacheHeader(refresh), fromId),
-                this::handleOnNext,
-                this::handleError);
+        Observable<Result<List<Question>>> shareable = questionService
+                .index(getCacheHeader(refresh), fromId)
+                .compose(rxSchedulers.applySchedulers())
+                .share();
+
+        subscriptions.add(shareable
+                .filter(isSuccess())
+                .map(result -> result.response().body())
+                .subscribe(view::onQuestionsRetrieved));
+
+        subscriptions.add(shareable
+                .filter(not(isSuccess()))
+                .subscribe(this::handleError));
     }
 
     public void answerQuestion(int questionId, boolean isYes) {
-        subscriptions.add(questionService.answer(questionId, new AnswerRequest(isYes)),
-                question -> {},
-                this::handleAnswerError);
-    }
+        Observable<Result<Question>> shareable = questionService
+                .answer(questionId, new AnswerRequest(isYes))
+                .compose(rxSchedulers.applySchedulers())
+                .share();
 
-    private void handleAnswerError(Throwable throwable) {
-        if (throwable.getMessage() != null && throwable.getMessage().contains("422"))
-            view.onError(R.string.answer_error);
-        else super.handleError(throwable);
-    }
+        // Do nothing if isSuccess()
 
-    private void handleOnNext(Result<List<Question>> result) {
-        if (view == null) return;
+        subscriptions.add(shareable
+                .filter(hasError(UNPROCESSABLE_ENTITY))
+                .map(result -> R.string.answer_error)
+                .subscribe(view::onError));
 
-        if (result.isError()) {
-            handleError(result.error());
-        } else {
-            Response<List<Question>> response = result.response();
-
-            if (response.isSuccess())
-                view.onPostsRetrieved(response.body());
-            else
-                defaultResponses(response.code());
-        }
+        subscriptions.add(shareable
+                .filter(not(hasError(UNPROCESSABLE_ENTITY)))
+                .filter(not(isSuccess()))
+                .subscribe(this::handleError));
     }
 
 }

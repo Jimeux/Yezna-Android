@@ -34,7 +34,7 @@ public interface UserService {
     Observable<Result<AccessToken>> register(@Body RegistrationRequest user);
 
     @GET("/api/users/{username}")
-    Observable<User> getUser(@Path("username") String username);
+    Observable<Result<User>> getUser(@Path("username") String username);
 
     /*@Multipart
     @POST("/api/users/avatar")

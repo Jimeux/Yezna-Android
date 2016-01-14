@@ -139,7 +139,7 @@ public class PublicQuestionFragment extends RxFragment
     }
 
     @Override
-    public void onPostsRetrieved(List<Question> newQuestions) {
+    public void onQuestionsRetrieved(List<Question> newQuestions) {
         loading = false;
 
         if (newQuestions.isEmpty() && questions.isEmpty())
@@ -156,7 +156,7 @@ public class PublicQuestionFragment extends RxFragment
     @Override
     public void onAnswerQuestion(Question question, View view, boolean yes) {
         if (!credentialStore.isLoggedIn())
-            promptForLogin();
+            promptForLogin(getString(R.string.sign_in_to_answer));
         else {
             presenter.answerQuestion(question.getId(), yes);
             cardDeck.pop();

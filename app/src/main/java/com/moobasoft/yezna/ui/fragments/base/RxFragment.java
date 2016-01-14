@@ -49,6 +49,10 @@ public abstract class RxFragment extends Fragment {
         eventBus.send(new LoginPromptEvent());
     }
 
+    public void promptForLogin(String message) {
+        eventBus.send(new LoginPromptEvent(message));
+    }
+
     protected MainComponent getComponent() {
         return DaggerMainComponent.builder()
                 .mainModule(new MainModule())

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
 
     @Inject ConnectPresenter presenter;
 
+    @Bind(R.id.btn_close)       ImageView closeBtn;
     @Bind(R.id.btn_primary)     TextView primaryBtn;
     @Bind(R.id.btn_secondary)   TextView secondaryBtn;
     @Bind(R.id.email_label)     View emailLabel;
@@ -120,7 +122,6 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
 
     @Override
     public void onLogin() {
-        setProcessing(false);
         Toast.makeText(this, getString(R.string.login_success), Toast.LENGTH_SHORT)
                 .show();
         eventBus.send(new LoginEvent());
@@ -129,8 +130,8 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
 
     @Override
     public void onRegister(String username) {
-        setProcessing(false);
         Toast.makeText(this, getString(R.string.register_success, username), Toast.LENGTH_LONG).show();
+        eventBus.send(new LoginEvent());
         finish();
     }
 
@@ -159,6 +160,10 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     }
 
     private void setProcessing(boolean processing) {
+        this.setFinishOnTouchOutside(!processing);
+        secondaryBtn.setEnabled(!processing);
+        closeBtn.setEnabled(!processing);
+
         for (EditText e : inputFields)
             e.setEnabled(!processing);
 

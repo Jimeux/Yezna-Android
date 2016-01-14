@@ -16,7 +16,7 @@
     <string name="logout">Sign out</string>
 
     <!-- Questions -->
-    <string name="no_more_questions">No more questions</string>
+    <string name="no_more_questions">There are no questions left to answer! Why not ask one of your own?</string>
     <string name="no_questions_found">No questions found</string>
     <!-- Answers -->
     <string name="answer_error">You already answered that question!</string>
@@ -38,5 +38,7 @@
     <string name="not_signed_in">Not signed in</string>
     <string name="login_prompt">Already a member? Sign in.</string>
     <string name="register_prompt">Create a new account.</string>
+    <string name="sign_in_to_answer">Sign in to answer</string>
+    <string name="signed_in_as">Signed in as %1$s</string>
 
 </resources>

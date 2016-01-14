@@ -2,7 +2,7 @@ package com.moobasoft.yezna.ui.presenters;
 
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.rest.services.QuestionService;
-import com.moobasoft.yezna.ui.RxSubscriber;
+import com.moobasoft.yezna.ui.RxSchedulers;
 import com.moobasoft.yezna.ui.presenters.base.RxPresenter;
 
 import java.util.List;
@@ -18,31 +18,25 @@ public class SummaryPresenter extends RxPresenter<SummaryPresenter.View> {
 
     private final QuestionService questionService;
 
-    public SummaryPresenter(QuestionService questionService, RxSubscriber subscriptions) {
+    public SummaryPresenter(QuestionService questionService, RxSchedulers subscriptions) {
         super(subscriptions);
         this.questionService = questionService;
     }
 
     public void loadSummaries(boolean refresh, int page) {
-        subscriptions.add(
+        /*subscriptions.add(
                 questionService.index(getCacheHeader(refresh), page),
                 this::handleOnNext,
-                this::handleError);
+                this::handleError);*/
     }
 
     private void handleOnNext(Result<List<Question>> result) {
-        if (view == null) return;
+        Response<List<Question>> response = result.response();
 
-        if (result.isError())
-            handleError(result.error());
-        else {
-            Response<List<Question>> response = result.response();
-
-            if (response.isSuccess())
-                view.onPostsRetrieved(response.body());
-            else
-                defaultResponses(response.code());
-        }
+        if (response.isSuccess())
+            view.onPostsRetrieved(response.body());
+        else
+            defaultResponses(result);
     }
 
 }

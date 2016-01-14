@@ -7,13 +7,12 @@ import com.moobasoft.yezna.rest.models.AccessToken;
 import com.moobasoft.yezna.rest.models.User;
 import com.moobasoft.yezna.rest.requests.RegistrationRequest;
 import com.moobasoft.yezna.rest.services.UserService;
-import com.moobasoft.yezna.ui.RxSubscriber;
+import com.moobasoft.yezna.ui.RxSchedulers;
 import com.moobasoft.yezna.ui.presenters.base.RxPresenter;
 import com.squareup.okhttp.ResponseBody;
 
 import java.io.IOException;
 
-import retrofit.Response;
 import retrofit.Result;
 import rx.Observable;
 
@@ -29,42 +28,80 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
     private final UserService userService;
     private final CredentialStore credentialStore;
 
-    public ConnectPresenter(RxSubscriber subscriptions,
+    public ConnectPresenter(RxSchedulers rxSchedulers,
                             UserService userService,
                             CredentialStore credentialStore) {
-        super(subscriptions);
+        super(rxSchedulers);
         this.userService = userService;
         this.credentialStore = credentialStore;
     }
 
-    public void handleOnNextRegister(Result<AccessToken> result) {
-        Response<AccessToken> response = result.response();
+    public void login(String username, String password) {
+        Observable<Result<AccessToken>> shareable = userService
+                .getAccessToken(username, password, "password")
+                .compose(rxSchedulers.applySchedulers())
+                .share();
 
-        if (result.isError()) {
-            handleError(result.error());
-        } else if (response.code() == CREATED) {
-            credentialStore.saveToken(response.body());
-        } else if (response.code() == UNPROCESSABLE_ENTITY) {
-            getInputErrors(response.errorBody());
-        } else
-            defaultResponses(response.code());
+        subscriptions.add(shareable
+                .filter(not(isSuccess()))
+                .filter(not(Result::isError))
+                .subscribe(result -> view.onLoginError()));
+
+        subscriptions.add(shareable
+                .filter(not(isSuccess()))
+                .subscribe(this::handleError));
+
+        subscribeUserObservable(shareable, username);
     }
 
-    public void handleOnNextLogin(Result<AccessToken> result) {
-        credentialStore.delete();
-        Response<AccessToken> response = result.response();
+    public void register(String email, String username, String password) {
+        Observable<Result<AccessToken>> shareable = userService
+                .register(new RegistrationRequest(email, username, password))
+                .compose(rxSchedulers.applySchedulers())
+                .share();
 
-        if (result.isError()) {
-            handleError(result.error());
-        } else if (response.isSuccess()) {
-            credentialStore.saveToken(response.body());
-        } else if (response.code() == UNAUTHORIZED) {
-            view.onLoginError();
-        } else
-            defaultResponses(response.code());
+        subscriptions.add(shareable
+                .filter(hasError(UNPROCESSABLE_ENTITY))
+                .map(result -> result.response().errorBody())
+                .subscribe(this::handleValidationErrors));
+
+        subscriptions.add(shareable
+                .filter(not(isSuccess()))
+                .filter(not(hasError(UNPROCESSABLE_ENTITY)))
+                .subscribe(this::handleError));
+
+        subscribeUserObservable(shareable, username);
     }
 
-    private void getInputErrors(ResponseBody errorBody) {
+    private void subscribeUserObservable(Observable<Result<AccessToken>> tokenShareable, String username) {
+        Observable<Result<User>> userShareable = tokenShareable
+                .filter(isSuccess())
+                .map(result -> result.response().body())
+                .flatMap(token -> mapTokenToGetUser(username, token))
+                .share();
+
+        subscriptions.add(userShareable
+                .filter(isSuccess())
+                .map(result -> result.response().body())
+                .subscribe(this::handleGetUser));
+
+        subscriptions.add(userShareable
+                .filter(not(isSuccess())) //TODO: Retry
+                .subscribe(this::handleError));
+    }
+
+    private Observable<Result<User>> mapTokenToGetUser(String username, AccessToken token) {
+        credentialStore.saveToken(token);
+        return userService.getUser(username)
+                .compose(rxSchedulers.applySchedulers());
+    }
+
+    private void handleGetUser(User user) {
+        credentialStore.saveUser(user);
+        view.onLogin();
+    }
+
+    private void handleValidationErrors(ResponseBody errorBody) {
         try {
             RegistrationError error = RegistrationError.CONVERTER.convert(errorBody);
             view.onRegistrationError(error.getUsername(),
@@ -73,37 +110,5 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
         } catch (IOException e) {
             view.onError(R.string.error_default);
         }
-    }
-
-    public void login(String username, String password) {
-        Observable<Result<AccessToken>> observable =
-                userService.getAccessToken(username, password, "password")
-                .doOnNext(this::handleOnNextLogin);
-        getUserAfterConnect(true, username, observable);
-    }
-
-    public void register(String email, String username, String password) {
-        Observable<Result<AccessToken>> observable =
-                userService.register(new RegistrationRequest(email, username, password))
-                        .doOnNext(this::handleOnNextRegister);
-        getUserAfterConnect(true, username, observable);
-    }
-
-    private void getUserAfterConnect(boolean isLogin, String username,
-                                     Observable<Result<AccessToken>> observable) {
-        Observable<User> userObservable = observable.flatMap(accessTokenResult -> {
-            return userService.getUser(username); //TODO: Retries
-        });
-
-        subscriptions.add(userObservable,
-                user -> handleUserRetrieved(user, isLogin), this::handleError);
-    }
-
-    private void handleUserRetrieved(User user, boolean isLogin) {
-        credentialStore.saveUser(user);
-        if (isLogin)
-            view.onLogin();
-        else
-            view.onRegister(user.getUsername());
     }
 }

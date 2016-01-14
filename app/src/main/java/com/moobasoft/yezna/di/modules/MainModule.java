@@ -4,7 +4,7 @@ import com.moobasoft.yezna.di.scopes.PerActivity;
 import com.moobasoft.yezna.rest.auth.CredentialStore;
 import com.moobasoft.yezna.rest.services.QuestionService;
 import com.moobasoft.yezna.rest.services.UserService;
-import com.moobasoft.yezna.ui.RxSubscriber;
+import com.moobasoft.yezna.ui.RxSchedulers;
 import com.moobasoft.yezna.ui.presenters.ConnectPresenter;
 import com.moobasoft.yezna.ui.presenters.PublicQuestionPresenter;
 import com.moobasoft.yezna.ui.presenters.SummaryPresenter;
@@ -19,28 +19,28 @@ import rx.schedulers.Schedulers;
 public class MainModule {
 
     @Provides
-    public RxSubscriber rxSubscriber() {
+    public RxSchedulers rxSubscriber() {
         // TODO: provide these schedulers
-        return new RxSubscriber(Schedulers.io(), AndroidSchedulers.mainThread());
+        return new RxSchedulers(Schedulers.io(), AndroidSchedulers.mainThread());
     }
 
     @PerActivity
     @Provides
-    public PublicQuestionPresenter randomPresenter(RxSubscriber subscriptionManager,
+    public PublicQuestionPresenter randomPresenter(RxSchedulers subscriptionManager,
                                            QuestionService questionService) {
         return new PublicQuestionPresenter(questionService, subscriptionManager);
     }
 
     @PerActivity
     @Provides
-    public SummaryPresenter summaryPresenter(RxSubscriber subscriptionManager,
+    public SummaryPresenter summaryPresenter(RxSchedulers subscriptionManager,
                                            QuestionService questionService) {
         return new SummaryPresenter(questionService, subscriptionManager);
     }
 
     @PerActivity
     @Provides
-    public ConnectPresenter loginPresenter(RxSubscriber subscriptionManager,
+    public ConnectPresenter loginPresenter(RxSchedulers subscriptionManager,
                                            UserService userService,
                                            CredentialStore credentialStore) {
         return new ConnectPresenter(subscriptionManager, userService, credentialStore);
