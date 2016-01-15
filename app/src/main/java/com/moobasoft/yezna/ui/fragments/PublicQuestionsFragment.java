@@ -31,7 +31,7 @@ import rx.subscriptions.CompositeSubscription;
 import static android.view.View.VISIBLE;
 import static com.moobasoft.yezna.ui.views.PublicQuestionView.QuestionClickListener;
 
-public class PublicQuestionFragment extends RxFragment
+public class PublicQuestionsFragment extends RxFragment
         implements PublicQuestionPresenter.View, QuestionClickListener {
 
     @Inject PublicQuestionPresenter presenter;
@@ -49,7 +49,7 @@ public class PublicQuestionFragment extends RxFragment
      */
     private boolean loading;
 
-    public PublicQuestionFragment() {
+    public PublicQuestionsFragment() {
     }
 
     @Override public void onCreate(@Nullable Bundle state) {

@@ -2,6 +2,7 @@ package com.moobasoft.yezna.rest.services;
 
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.rest.requests.AnswerRequest;
+import com.moobasoft.yezna.rest.requests.QuestionRequest;
 
 import java.util.List;
 
@@ -24,6 +25,9 @@ public interface QuestionService {
     @GET("/api/questions")
     Observable<List<Question>> index(@Header(CACHE_CONTROL_HEADER) String cacheControl,
                                              @Query("from_id") int fromId);
+
+    @POST("/api/questions")
+    Observable<Question> create(@Body QuestionRequest question);
 
     @POST("/api/questions/{id}/answers")
     Observable<Question> answer(@Path("id") int questionId,

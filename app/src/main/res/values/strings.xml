@@ -43,5 +43,20 @@
     <string name="signed_in_as">Signed in as %1$s</string>
     <string name="unauthorized_my_questions">Sign in to view your questions</string>
     <string name="no_my_questions">You haven\'t asked any questions yet</string>
+    <string name="blank_question_error">Question can\'t be blank</string>
+    <string name="type_a_question">Type a yes-no question</string>
+
+    <string name="public_checkbox">Public</string>
+    <string name="time_limit_prompt">Never expires</string>
+    <string-array name="time_limits">
+        <item>Never expires</item>
+        <item>Expires in 3 months</item>
+        <item>Expires in 1 month</item>
+        <item>Expires in 1 week</item>
+        <item>Expires in 1 day</item>
+    </string-array>
+
+
+    <string name="ask_btn">Ask the world</string>
 
 </resources>

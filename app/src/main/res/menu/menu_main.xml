@@ -16,7 +16,7 @@
         app:showAsAction="ifRoom"/>
 
     <item
-        android:id="@+id/action_create_question"
+        android:id="@+id/action_ask_question"
         android:title="@string/create_question"
         android:orderInCategory="102"
         android:icon="@drawable/ic_edit_white_24dp"

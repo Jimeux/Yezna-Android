@@ -1,0 +1,79 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="26dp"
+        android:paddingRight="26dp">
+
+        <TextView
+            android:id="@+id/prompt_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/type_a_question"
+            android:textColor="@color/grey800"
+            android:textSize="20sp"/>
+
+        <EditText
+            android:id="@+id/question_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+
+            android:layout_marginTop="40dp"
+            android:gravity="top"
+            android:imeOptions="actionDone"
+            android:inputType="text|textCapSentences"
+            android:maxLength="180"
+            android:minLines="3"
+            android:paddingBottom="8dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="8dp"
+            android:scrollHorizontally="false"
+            android:scrollbars="vertical"
+            android:singleLine="false"
+            android:textSize="18sp"/>
+
+        <Spinner
+            android:visibility="gone"
+            android:id="@+id/time_limit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/time_limits"
+            android:gravity="center" />
+
+        <CheckBox
+            android:id="@+id/public_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="10dp"
+            android:checked="true"
+            android:text="@string/public_checkbox"/>
+
+        <Button
+            android:id="@+id/ask_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:text="@string/ask_btn"
+            android:textColor="@color/white"/>
+
+        <include layout="@layout/btn_processing"/>
+
+    </LinearLayout>
+
+    <include layout="@layout/status_views"/>
+
+</RelativeLayout>

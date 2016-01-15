@@ -23,14 +23,16 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.events.EventBus;
+import com.moobasoft.yezna.events.ask.QuestionCreatedEvent;
 import com.moobasoft.yezna.events.auth.LogOutEvent;
 import com.moobasoft.yezna.events.auth.LoginEvent;
 import com.moobasoft.yezna.events.auth.LoginPromptEvent;
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.rest.models.User;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
+import com.moobasoft.yezna.ui.fragments.AskQuestionFragment;
 import com.moobasoft.yezna.ui.fragments.MyQuestionsFragment;
-import com.moobasoft.yezna.ui.fragments.PublicQuestionFragment;
+import com.moobasoft.yezna.ui.fragments.PublicQuestionsFragment;
 
 import javax.inject.Inject;
 
@@ -53,7 +55,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
     public static final String CURRENT_TAG_KEY = "current_tag_key";
 
-    enum Tag {PUBLIC_QUESTIONS, MY_QUESTIONS, CREATE_QUESTION, PROFILE}
+    enum Tag {PUBLIC_QUESTIONS, MY_QUESTIONS, ASK_QUESTION, PROFILE}
 
     private Tag currentTag = Tag.PUBLIC_QUESTIONS;
     private FragmentManager fragmentManager;
@@ -110,8 +112,12 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 .listenFor(LogOutEvent.class)
                 .subscribe(this::clearUserDetails);
 
+        Subscription createdEvent = eventBus
+                .listenFor(QuestionCreatedEvent.class)
+                .subscribe(questionCreatedEvent -> showFragment(Tag.MY_QUESTIONS));
+
         eventSubscriptions = new CompositeSubscription(
-                loginEvent, loginPromptEvent, logoutEvent);
+                loginEvent, loginPromptEvent, logoutEvent, createdEvent);
     }
 
     private void showFragment(Tag tag) {
@@ -134,9 +140,11 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     private Fragment createFragment(Tag tag) {
         switch (tag) {
             case PUBLIC_QUESTIONS:
-                return new PublicQuestionFragment();
+                return new PublicQuestionsFragment();
             case MY_QUESTIONS:
                 return new MyQuestionsFragment();
+            case ASK_QUESTION:
+                return new AskQuestionFragment();
             default:
                 return null;
         }
@@ -151,6 +159,10 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
                 case R.id.action_my_questions:
                     showFragment(Tag.MY_QUESTIONS);
+                    break;
+
+                case R.id.action_ask_question:
+                    showFragment(Tag.ASK_QUESTION);
                     break;
 
                 /** Auth-related items */
@@ -240,10 +252,12 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        menu.findItem(R.id.action_ask_question).setVisible(
+                !currentTag.equals(Tag.ASK_QUESTION));
         menu.findItem(R.id.action_public_questions).setVisible(
-                currentTag.equals(Tag.MY_QUESTIONS));
+                currentTag.equals(Tag.MY_QUESTIONS) || currentTag.equals(Tag.ASK_QUESTION));
         menu.findItem(R.id.action_my_questions).setVisible(
-                currentTag.equals(Tag.PUBLIC_QUESTIONS));
+                currentTag.equals(Tag.PUBLIC_QUESTIONS) || currentTag.equals(Tag.ASK_QUESTION));
         return true;
     }
 
@@ -253,8 +267,8 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 drawerLayout.openDrawer(GravityCompat.START);
                 return true;
 
-            case R.id.action_create_question:
-                promptForLogin(null);
+            case R.id.action_ask_question:
+                showFragment(Tag.ASK_QUESTION);
                 break;
 
             case R.id.action_my_questions:

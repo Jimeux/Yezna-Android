@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.moobasoft.yezna.R;
+import com.moobasoft.yezna.events.ask.QuestionCreatedEvent;
 import com.moobasoft.yezna.events.auth.LogOutEvent;
 import com.moobasoft.yezna.events.auth.LoginEvent;
 import com.moobasoft.yezna.rest.models.Question;
@@ -123,19 +124,24 @@ public class MyQuestionsFragment extends RxFragment implements MyQuestionsPresen
     }
 
     @Override protected void subscribeToEvents() {
-        Subscription loginEventSubscription =
+        Subscription loginEvent =
                 eventBus.listenFor(LoginEvent.class)
                         .subscribe(event -> loadQuestions(true));
 
-        Subscription logOutEventSubscription =
+        Subscription logOutEvent =
                 eventBus.listenFor(LogOutEvent.class)
                         .subscribe(event -> {
                             activateEmptyView(getString(R.string.unauthorized_my_questions));
                             reset();
                         });
 
+        Subscription createdEvent = eventBus
+                .listenFor(QuestionCreatedEvent.class)
+                .map(QuestionCreatedEvent::getQuestion)
+                .subscribe(questionAdapter::loadQuestion);
+
         eventSubscriptions = new CompositeSubscription(
-                loginEventSubscription, logOutEventSubscription);
+                loginEvent, logOutEvent, createdEvent);
     }
 
     private void initialiseRecyclerView() {

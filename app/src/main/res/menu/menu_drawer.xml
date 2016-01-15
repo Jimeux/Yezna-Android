@@ -17,7 +17,7 @@
         android:orderInCategory="101"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/action_create_question"
+            android:id="@+id/action_ask_question"
             android:icon="@drawable/ic_edit_white_24dp"
             android:orderInCategory="103"
             android:title="@string/create_question" />
