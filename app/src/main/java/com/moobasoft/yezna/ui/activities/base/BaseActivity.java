@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 
 import com.moobasoft.yezna.App;
-import com.moobasoft.yezna.EventBus;
+import com.moobasoft.yezna.events.EventBus;
 import com.moobasoft.yezna.di.components.DaggerMainComponent;
 import com.moobasoft.yezna.di.components.MainComponent;
 import com.moobasoft.yezna.di.modules.MainModule;

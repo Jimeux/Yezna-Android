@@ -9,8 +9,7 @@ import com.moobasoft.yezna.ui.RxSchedulers;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
-import retrofit.Result;
-import rx.functions.Func1;
+import retrofit2.HttpException;
 import rx.subscriptions.CompositeSubscription;
 
 public abstract class RxPresenter<V extends RxPresenter.RxView> extends Presenter<V> {
@@ -40,30 +39,12 @@ public abstract class RxPresenter<V extends RxPresenter.RxView> extends Presente
         subscriptions.clear();
     }
 
-    protected String getCacheHeader(boolean forceRefresh) {
-        return (forceRefresh) ? Rest.CACHE_NO_CACHE : Rest.CACHE_DEFAULT;
-    }
-
-    public void defaultResponses(Result<?> result) {
-        final int code = result.response().code();
-
-        switch (code) {
-            case UNAUTHORIZED:
-                view.promptForLogin();
-                break;
-            case GATEWAY_TIMEOUT:
-                view.onError(R.string.error_offline);
-                break;
-            default:
-                Log.e("Taggart", "Error in defaultResponses: code " + code);
-                view.onError(R.string.error_default);
-        }
-    }
-
     public void handleThrowable(Throwable throwable) {
         String message = throwable.getMessage();
 
-        if (throwable instanceof SocketTimeoutException)
+        if (throwable instanceof HttpException)
+            handleHttpResponses(((HttpException) throwable).code());
+        else if (throwable instanceof SocketTimeoutException)
             view.onError(R.string.error_timeout);
         else if (message != null && message.contains(OFFLINE_CODE))
             view.onError(R.string.error_offline);
@@ -76,23 +57,26 @@ public abstract class RxPresenter<V extends RxPresenter.RxView> extends Presente
         }
     }
 
-    public void handleError(Result<?> result) {
-        if (result.isError())
-            handleThrowable(result.error());
-        else
-            defaultResponses(result);
+    private void handleHttpResponses(int code) {
+        switch (code) {
+            case UNAUTHORIZED:
+                view.promptForLogin();
+                break;
+            case GATEWAY_TIMEOUT:
+                view.onError(R.string.error_offline);
+                break;
+            default:
+                Log.e("Taggart", "Error in handleHttpResponses: code " + code);
+                view.onError(R.string.error_default);
+        }
     }
 
-    protected static Func1<Result<?>, Boolean> hasError(final int errorCode) {
-        return result -> !result.isError() && result.response().code() == errorCode;
+    protected static boolean hasErrorCode(Throwable throwable, int code) {
+        return throwable instanceof HttpException &&
+                ((HttpException) throwable).code() == code;
     }
 
-    protected static Func1<Result<?>, Boolean> isSuccess() {
-        return result -> !result.isError() && result.response().isSuccess();
+    protected static String getCacheHeader(boolean forceRefresh) {
+        return (forceRefresh) ? Rest.CACHE_NO_CACHE : Rest.CACHE_DEFAULT;
     }
-
-    public static <T> Func1<T, Boolean> not(final Func1<T, Boolean> func) {
-        return value -> !func.call(value);
-    }
-
 }

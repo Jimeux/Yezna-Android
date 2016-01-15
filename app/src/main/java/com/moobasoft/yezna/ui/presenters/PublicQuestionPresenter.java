@@ -9,8 +9,8 @@ import com.moobasoft.yezna.ui.presenters.base.RxPresenter;
 
 import java.util.List;
 
-import retrofit.Result;
 import rx.Observable;
+import rx.Subscription;
 
 public class PublicQuestionPresenter extends RxPresenter<PublicQuestionPresenter.View> {
 
@@ -20,44 +20,59 @@ public class PublicQuestionPresenter extends RxPresenter<PublicQuestionPresenter
 
     private final QuestionService questionService;
 
+    private Observable<List<Question>> questionObservable;
+    private Observable<Question> answerObservable;
+
     public PublicQuestionPresenter(QuestionService questionService, RxSchedulers subscriptions) {
         super(subscriptions);
         this.questionService = questionService;
     }
 
+    @Override public void bindView(View view) {
+        super.bindView(view);
+        if (questionObservable != null)
+            subscribeToQuestionObservable();
+        if (answerObservable != null)
+            subscribeToAnswerObservable();
+    }
+
     public void loadSummaries(boolean refresh, int fromId) {
-        Observable<Result<List<Question>>> shareable = questionService
+        questionObservable = questionService
                 .index(getCacheHeader(refresh), fromId)
                 .compose(rxSchedulers.applySchedulers())
-                .share();
+                .cache();
+        subscribeToQuestionObservable();
+    }
 
-        subscriptions.add(shareable
-                .filter(isSuccess())
-                .map(result -> result.response().body())
-                .subscribe(view::onQuestionsRetrieved));
-
-        subscriptions.add(shareable
-                .filter(not(isSuccess()))
-                .subscribe(this::handleError));
+    private void subscribeToQuestionObservable() {
+        Subscription questionSubscription = questionObservable.subscribe(
+                view::onQuestionsRetrieved,
+                this::handleThrowable,
+                () -> questionObservable = null);
+        subscriptions.add(questionSubscription);
     }
 
     public void answerQuestion(int questionId, boolean isYes) {
-        Observable<Result<Question>> shareable = questionService
+        answerObservable = questionService
                 .answer(questionId, new AnswerRequest(isYes))
-                .compose(rxSchedulers.applySchedulers())
-                .share();
+                .compose(rxSchedulers.applySchedulers()) //TODO: Retry
+                .cache();
+        subscribeToAnswerObservable();
+    }
 
-        // Do nothing if isSuccess()
+    private void subscribeToAnswerObservable() {
+        Subscription answerSubscription = answerObservable.subscribe(
+                question -> {},
+                this::handleAnswerOnError,
+                () -> answerObservable = null);
+        subscriptions.add(answerSubscription);
+    }
 
-        subscriptions.add(shareable
-                .filter(hasError(UNPROCESSABLE_ENTITY))
-                .map(result -> R.string.answer_error)
-                .subscribe(view::onError));
-
-        subscriptions.add(shareable
-                .filter(not(hasError(UNPROCESSABLE_ENTITY)))
-                .filter(not(isSuccess()))
-                .subscribe(this::handleError));
+    private void handleAnswerOnError(Throwable throwable) {
+        if (hasErrorCode(throwable, UNPROCESSABLE_ENTITY))
+            view.onError(R.string.answer_error);
+        else
+            handleThrowable(throwable);
     }
 
 }

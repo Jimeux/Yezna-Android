@@ -2,7 +2,7 @@ package com.moobasoft.yezna.di.components;
 
 import android.content.Context;
 
-import com.moobasoft.yezna.EventBus;
+import com.moobasoft.yezna.events.EventBus;
 import com.moobasoft.yezna.di.modules.AppModule;
 import com.moobasoft.yezna.di.modules.EndpointModule;
 import com.moobasoft.yezna.di.modules.RestModule;
@@ -12,7 +12,7 @@ import com.moobasoft.yezna.rest.auth.CredentialStore;
 import javax.inject.Singleton;
 
 import dagger.Component;
-import retrofit.Retrofit;
+import retrofit2.Retrofit;
 
 @Singleton
 @Component(

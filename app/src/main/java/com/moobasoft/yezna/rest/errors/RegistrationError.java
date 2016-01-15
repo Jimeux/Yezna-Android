@@ -1,11 +1,10 @@
 package com.moobasoft.yezna.rest.errors;
 
-import com.squareup.okhttp.ResponseBody;
-
 import java.util.List;
 
-import retrofit.Converter;
-import retrofit.GsonConverterFactory;
+import okhttp3.ResponseBody;
+import retrofit2.Converter;
+import retrofit2.GsonConverterFactory;
 
 public class RegistrationError extends ErrorBase {
 
@@ -16,10 +15,10 @@ public class RegistrationError extends ErrorBase {
     @SuppressWarnings("unchecked")
     public static final Converter<ResponseBody, RegistrationError> CONVERTER =
             (Converter<ResponseBody, RegistrationError>) GsonConverterFactory
-                    .create().fromResponseBody(RegistrationError.class, null);
+                    .create().responseBodyConverter(RegistrationError.class, null, null);
 
     public String getUsername() {
-        return composeErrors(username);
+        return formatError(username);
     }
 
     public void setUsername(List<String> username) {
@@ -27,7 +26,7 @@ public class RegistrationError extends ErrorBase {
     }
 
     public String getEmail() {
-        return composeErrors(email);
+        return formatError(email);
     }
 
     public void setEmail(List<String> email) {
@@ -35,7 +34,7 @@ public class RegistrationError extends ErrorBase {
     }
 
     public String getPassword() {
-        return composeErrors(password);
+        return formatError(password);
     }
 
     public void setPassword(List<String> password) {

@@ -7,13 +7,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.moobasoft.yezna.App;
-import com.moobasoft.yezna.EventBus;
+import com.moobasoft.yezna.events.EventBus;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.di.components.DaggerMainComponent;
 import com.moobasoft.yezna.di.components.MainComponent;
 import com.moobasoft.yezna.di.modules.MainModule;
+import com.moobasoft.yezna.events.auth.LoginPromptEvent;
 import com.moobasoft.yezna.rest.auth.CredentialStore;
-import com.moobasoft.yezna.ui.activities.MainActivity.LoginPromptEvent;
 
 import java.util.List;
 
@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.OnClick;
+import rx.subscriptions.CompositeSubscription;
 
 import static android.view.View.VISIBLE;
 
@@ -28,6 +29,8 @@ public abstract class RxFragment extends Fragment {
 
     @Inject protected EventBus eventBus;
     @Inject protected CredentialStore credentialStore;
+
+    protected CompositeSubscription eventSubscriptions;
 
     @Bind(R.id.content)      protected ViewGroup contentView;
     @Bind(R.id.loading_view) protected ViewGroup loadingView;
@@ -37,6 +40,19 @@ public abstract class RxFragment extends Fragment {
     @Bind(R.id.empty_msg)    protected TextView emptyMessage;
     @Bind({R.id.loading_view, R.id.error_view, R.id.empty_view, R.id.content})
     protected List<ViewGroup> stateViews;
+
+    protected abstract void subscribeToEvents();
+
+    @Override public void onStart() {
+        super.onStart();
+        subscribeToEvents();
+    }
+
+    @Override public void onStop() {
+        super.onStop();
+        if (eventSubscriptions != null)
+            eventSubscriptions.clear();
+    }
 
     public void onError(int messageId) {
         String message = getString(messageId);

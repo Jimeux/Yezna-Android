@@ -15,7 +15,7 @@ import com.moobasoft.yezna.rest.models.Question;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public final class QuestionView extends CardView {
+public final class PublicQuestionView extends CardView {
     @Bind(R.id.image)       ImageView imageIv;
     @Bind(R.id.avatar)      ImageView avatarIv;
     @Bind(R.id.username)    TextView  usernameTv;
@@ -29,7 +29,7 @@ public final class QuestionView extends CardView {
         void onAnswerQuestion(Question question, View view, boolean yes);
     }
 
-    public QuestionView(Context context, AttributeSet attrs) {
+    public PublicQuestionView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 

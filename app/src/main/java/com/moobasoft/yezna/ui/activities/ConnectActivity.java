@@ -1,5 +1,6 @@
 package com.moobasoft.yezna.ui.activities;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -9,9 +10,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moobasoft.yezna.App;
+import com.moobasoft.yezna.ui.fragments.PresenterRetainer;
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.di.components.DaggerMainComponent;
 import com.moobasoft.yezna.di.modules.MainModule;
+import com.moobasoft.yezna.events.auth.LoginEvent;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
 import com.moobasoft.yezna.ui.presenters.ConnectPresenter;
 
@@ -28,45 +31,76 @@ import static android.view.View.VISIBLE;
 
 public class ConnectActivity extends BaseActivity implements ConnectPresenter.View {
 
-    public static class LoginEvent {}
+    public static final String PROCESSING_KEY = "processing_key";
+    private boolean processing;
 
-    public static final String REGISTER = "form";
+    @Override protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putBoolean(PROCESSING_KEY, processing);
+    }
 
-    @Inject ConnectPresenter presenter;
-
-    @Bind(R.id.btn_close)       ImageView closeBtn;
-    @Bind(R.id.btn_primary)     TextView primaryBtn;
-    @Bind(R.id.btn_secondary)   TextView secondaryBtn;
-    @Bind(R.id.email_label)     View emailLabel;
-    @Bind(R.id.email_et)        EditText emailEt;
-    @Bind(R.id.username_et)     EditText usernameEt;
-    @Bind(R.id.password_et)     EditText passwordEt;
-    @Bind({R.id.email_et, R.id.username_et, R.id.password_et})
-    List<EditText> inputFields;
-
-    @OnClick(R.id.btn_primary)
-    public void clickPrimaryButton() {
-        clearErrors();
-        setProcessing(true);
-        //TODO: validation
-        if (isLoginForm()) {
-            presenter.login(usernameEt.getText().toString(),
-                            passwordEt.getText().toString());
-        } else {
-            presenter.register(emailEt.getText().toString(),
-                               usernameEt.getText().toString(),
-                               passwordEt.getText().toString());
+    @Override protected void onRestoreInstanceState(Bundle state) {
+        super.onRestoreInstanceState(state);
+        if (state != null) {
+            processing = state.getBoolean(PROCESSING_KEY);
+            setProcessing(processing);
         }
     }
 
-    @OnClick(R.id.btn_secondary)
-    public void clickSecondaryButton() {
-        clearErrors();
-        switchForms(isLoginForm());
+    public static final String REGISTER = "form";
+    public static final String RETAINER = "connect_retainer";
+
+    @Inject ConnectPresenter presenter;
+
+    @Bind(R.id.btn_close) ImageView closeBtn;
+    @Bind(R.id.btn_primary) TextView primaryBtn;
+    @Bind(R.id.btn_secondary) TextView secondaryBtn;
+    @Bind(R.id.email_label) View emailLabel;
+    @Bind(R.id.email_et) EditText emailEt;
+    @Bind(R.id.username_et) EditText usernameEt;
+    @Bind(R.id.password_et) EditText passwordEt;
+    @Bind({R.id.username_et, R.id.email_et, R.id.password_et})
+    List<EditText> inputFields;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_connect);
+        ButterKnife.bind(this);
+        initialiseInjector();
+
+        Fragment retainer = getFragmentManager().findFragmentByTag(RETAINER);
+        if (retainer == null) {
+            PresenterRetainer<ConnectPresenter> presenterRetainer = new PresenterRetainer<>();
+            presenterRetainer.put(presenter);
+            getFragmentManager()
+                    .beginTransaction()
+                    .add(presenterRetainer, RETAINER)
+                    .commit();
+        } else {
+            presenter = (ConnectPresenter) ((PresenterRetainer) retainer).get();
+        }
+
+        presenter.bindView(this);
+        boolean isRegisterForm = getIntent().getBooleanExtra(REGISTER, true);
+        switchForms(isRegisterForm);
+        //ViewCompat.setTranslationZ(progressBar, 5);
+        //progressBar.getIndeterminateDrawable()
+        //      .setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
     }
 
-    @OnClick(R.id.btn_close)
-    public void clickCloseBtn() { finish(); }
+    private void initialiseInjector() {
+        DaggerMainComponent.builder()
+                .mainModule(new MainModule())
+                .appComponent(((App) getApplication()).getAppComponent())
+                .build().inject(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        presenter.releaseView();
+        super.onDestroy();
+    }
 
     private void switchForms(boolean loginForm) {
         if (loginForm) {
@@ -93,34 +127,6 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connect);
-        ButterKnife.bind(this);
-        initialiseInjector();
-        presenter.bindView(this);
-        boolean isRegisterForm = getIntent().getBooleanExtra(REGISTER, true);
-        switchForms(isRegisterForm);
-
-        //ViewCompat.setTranslationZ(progressBar, 5);
-        //progressBar.getIndeterminateDrawable()
-          //      .setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
-    }
-
-    private void initialiseInjector() {
-        DaggerMainComponent.builder()
-                .mainModule(new MainModule())
-                .appComponent(((App) getApplication()).getAppComponent())
-                .build().inject(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        presenter.releaseView();
-        super.onDestroy();
-    }
-
-    @Override
     public void onLogin() {
         Toast.makeText(this, getString(R.string.login_success), Toast.LENGTH_SHORT)
                 .show();
@@ -139,9 +145,8 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     public void onLoginError() {
         setProcessing(false);
         usernameEt.setError(getString(R.string.login_error));
+        usernameEt.requestFocus();
     }
-
-    @Override public void promptForLogin() {}
 
     @Override
     public void onError(int error) {
@@ -157,9 +162,19 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
         usernameEt.setError(username);
         emailEt.setError(email);
         passwordEt.setError(password);
+
+        for (EditText input : inputFields) {
+            if (input.getError() != null) {
+                input.requestFocus();
+                break;
+            }
+        }
     }
 
+    @Override public void promptForLogin() {}
+
     private void setProcessing(boolean processing) {
+        this.processing = processing;
         this.setFinishOnTouchOutside(!processing);
         secondaryBtn.setEnabled(!processing);
         closeBtn.setEnabled(!processing);
@@ -169,11 +184,37 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
 
         if (processing) {
             primaryBtn.setText(getString(R.string.loading));
-            primaryBtn.setBackgroundColor(getResources(). getColor(R.color.red300));
+            primaryBtn.setBackgroundColor(getResources().getColor(R.color.red300));
         } else {
             int stringId = isLoginForm() ? R.string.login : R.string.register;
             primaryBtn.setText(getString(stringId));
             primaryBtn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
+    }
+
+    @OnClick(R.id.btn_primary)
+    public void clickPrimaryButton() {
+        clearErrors();
+        setProcessing(true);
+        //TODO: validation
+        if (isLoginForm()) {
+            presenter.login(usernameEt.getText().toString(),
+                    passwordEt.getText().toString());
+        } else {
+            presenter.register(emailEt.getText().toString(),
+                    usernameEt.getText().toString(),
+                    passwordEt.getText().toString());
+        }
+    }
+
+    @OnClick(R.id.btn_secondary)
+    public void clickSecondaryButton() {
+        clearErrors();
+        switchForms(isLoginForm());
+    }
+
+    @OnClick(R.id.btn_close)
+    public void clickCloseBtn() {
+        finish();
     }
 }

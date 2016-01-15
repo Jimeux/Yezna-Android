@@ -12,12 +12,12 @@ import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 
 import com.moobasoft.yezna.R;
+import com.moobasoft.yezna.events.auth.LogOutEvent;
+import com.moobasoft.yezna.events.auth.LoginEvent;
 import com.moobasoft.yezna.rest.models.Question;
-import com.moobasoft.yezna.ui.activities.ConnectActivity;
-import com.moobasoft.yezna.ui.activities.MainActivity;
 import com.moobasoft.yezna.ui.fragments.base.RxFragment;
 import com.moobasoft.yezna.ui.presenters.PublicQuestionPresenter;
-import com.moobasoft.yezna.ui.views.QuestionView;
+import com.moobasoft.yezna.ui.views.PublicQuestionView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
 import static android.view.View.VISIBLE;
-import static com.moobasoft.yezna.ui.views.QuestionView.QuestionClickListener;
+import static com.moobasoft.yezna.ui.views.PublicQuestionView.QuestionClickListener;
 
 public class PublicQuestionFragment extends RxFragment
         implements PublicQuestionPresenter.View, QuestionClickListener {
@@ -39,7 +39,6 @@ public class PublicQuestionFragment extends RxFragment
     public static final String QUESTIONS_KEY = "questions_key";
     public static final int PER_PAGE = 6;
 
-    private CompositeSubscription eventSubscriptions;
     private ArrayList<Question> questions;
     /**
      * Manages question views as an animated deck of cards.
@@ -53,8 +52,7 @@ public class PublicQuestionFragment extends RxFragment
     public PublicQuestionFragment() {
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle state) {
+    @Override public void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
         getComponent().inject(this);
         presenter.bindView(this);
@@ -65,18 +63,15 @@ public class PublicQuestionFragment extends RxFragment
             questions = new ArrayList<>();
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
-        View view = inflater.inflate(R.layout.fragment_question, container, false);
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
+        View view = inflater.inflate(R.layout.fragment_public_questions, container, false);
         ButterKnife.bind(this, view);
         cardDeck = new CardDeck(contentView, questions, this);
         cardDeck.initialise();
         return view;
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle state) {
+    @Override public void onActivityCreated(@Nullable Bundle state) {
         super.onActivityCreated(state);
 
         if (state == null) // Add first-init check
@@ -87,38 +82,29 @@ public class PublicQuestionFragment extends RxFragment
             activateContentView();
     }
 
-    @Override
-    public void onStart() {
+    @Override public void onStart() {
         super.onStart();
         subscribeToEvents();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle state) {
+    @Override public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
         state.putParcelableArrayList(QUESTIONS_KEY, questions);
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        eventSubscriptions.clear();
-    }
-
-    @Override
-    public void onDestroyView() {
+    @Override public void onDestroyView() {
         presenter.releaseView();
         ButterKnife.unbind(this);
         super.onDestroyView();
     }
 
-    private void subscribeToEvents() {
+    @Override protected void subscribeToEvents() {
         Subscription loginEventSubscription =
-                eventBus.listenFor(ConnectActivity.LoginEvent.class)
+                eventBus.listenFor(LoginEvent.class)
                         .subscribe(event -> onRefresh());
 
         Subscription logOutEventSubscription =
-                eventBus.listenFor(MainActivity.LogOutEvent.class)
+                eventBus.listenFor(LogOutEvent.class)
                         .subscribe(event -> onRefresh());
 
         eventSubscriptions = new CompositeSubscription(
@@ -138,8 +124,7 @@ public class PublicQuestionFragment extends RxFragment
         presenter.loadSummaries(refresh, fromId);
     }
 
-    @Override
-    public void onQuestionsRetrieved(List<Question> newQuestions) {
+    @Override public void onQuestionsRetrieved(List<Question> newQuestions) {
         loading = false;
 
         if (newQuestions.isEmpty() && questions.isEmpty())
@@ -153,8 +138,7 @@ public class PublicQuestionFragment extends RxFragment
         }
     }
 
-    @Override
-    public void onAnswerQuestion(Question question, View view, boolean yes) {
+    @Override public void onAnswerQuestion(Question question, View view, boolean yes) {
         if (!credentialStore.isLoggedIn())
             promptForLogin(getString(R.string.sign_in_to_answer));
         else {
@@ -165,8 +149,7 @@ public class PublicQuestionFragment extends RxFragment
         }
     }
 
-    @Override
-    public void onRefresh() {
+    @Override public void onRefresh() {
         questions.clear();
         contentView.removeAllViews();
         loadPosts(true);
@@ -225,8 +208,8 @@ public class PublicQuestionFragment extends RxFragment
          * @param question the question object to bind the view to
          */
         private void push(Question question, boolean upright) {
-            QuestionView card = (QuestionView) LayoutInflater.from(container.getContext())
-                    .inflate(R.layout.view_question, container, false);
+            PublicQuestionView card = (PublicQuestionView) LayoutInflater.from(container.getContext())
+                    .inflate(R.layout.view_public_question, container, false);
             card.bindTo(question, clickListener);
             card.setRotation(upright ? 0F : -2F);
             container.addView(card, container.getChildCount());
@@ -246,15 +229,13 @@ public class PublicQuestionFragment extends RxFragment
             set.addAnimation(translate);
             set.setDuration(450);
             set.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
+                @Override public void onAnimationStart(Animation animation) {
                     setCardHardwareAcceleration(true);
                     ViewCompat.setTranslationZ(view, 4F);
                     popAndPushNext();
                 }
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
+                @Override public void onAnimationEnd(Animation animation) {
                     setCardHardwareAcceleration(false);
 
                     //FIXME: Ties this class to the fragment - REMOVE
@@ -264,8 +245,7 @@ public class PublicQuestionFragment extends RxFragment
                         activateEmptyView(getString(R.string.no_more_questions));
                 }
 
-                @Override
-                public void onAnimationRepeat(Animation animation) {
+                @Override public void onAnimationRepeat(Animation animation) {
                 }
             });
             view.startAnimation(set);

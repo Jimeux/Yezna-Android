@@ -4,13 +4,18 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
 import java.io.IOException;
 
-import static com.moobasoft.yezna.rest.Rest.*;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import static com.moobasoft.yezna.rest.Rest.ACCEPT_HEADER;
+import static com.moobasoft.yezna.rest.Rest.ACCEPT_JSON;
+import static com.moobasoft.yezna.rest.Rest.AUTHORIZATION_HEADER;
+import static com.moobasoft.yezna.rest.Rest.BEARER;
+import static com.moobasoft.yezna.rest.Rest.CACHE_CONTROL_HEADER;
+import static com.moobasoft.yezna.rest.Rest.CACHE_ONLY_IF_CACHED;
 
 public final class ApiHeaders implements Interceptor {
 

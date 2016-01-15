@@ -1,9 +1,12 @@
 package com.moobasoft.yezna.ui.activities;
 
+import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -18,12 +21,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.moobasoft.yezna.EventBus;
 import com.moobasoft.yezna.R;
+import com.moobasoft.yezna.events.EventBus;
+import com.moobasoft.yezna.events.auth.LogOutEvent;
+import com.moobasoft.yezna.events.auth.LoginEvent;
+import com.moobasoft.yezna.events.auth.LoginPromptEvent;
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.rest.models.User;
-import com.moobasoft.yezna.ui.activities.ConnectActivity.LoginEvent;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
+import com.moobasoft.yezna.ui.fragments.MyQuestionsFragment;
 import com.moobasoft.yezna.ui.fragments.PublicQuestionFragment;
 
 import javax.inject.Inject;
@@ -33,10 +39,11 @@ import butterknife.ButterKnife;
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
-import static com.moobasoft.yezna.ui.SummaryAdapter.SummaryClickListener;
+import static com.moobasoft.yezna.ui.MyQuestionsAdapter.SummaryClickListener;
 
 public class MainActivity extends BaseActivity implements SummaryClickListener {
 
+    @Bind(R.id.app_bar) AppBarLayout appBarLayout;
     @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
     @Bind(R.id.navigation_view) NavigationView navigationView;
     @Bind(R.id.toolbar) Toolbar toolbar;
@@ -44,11 +51,15 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
     @Inject EventBus eventBus;
 
+    public static final String CURRENT_TAG_KEY = "current_tag_key";
+
+    enum Tag {PUBLIC_QUESTIONS, MY_QUESTIONS, CREATE_QUESTION, PROFILE}
+
+    private Tag currentTag = Tag.PUBLIC_QUESTIONS;
     private FragmentManager fragmentManager;
     private CompositeSubscription eventSubscriptions;
 
-    @Override
-    protected void onCreate(@Nullable Bundle state) {
+    @Override protected void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
@@ -56,23 +67,29 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
         fragmentManager = getFragmentManager();
-
         initNavigationDrawer();
-
-        if (state == null)
-            fragmentManager.beginTransaction()
-                    .add(container.getId(), new PublicQuestionFragment())
-                    .commit();
     }
 
-    @Override
-    protected void onStart() {
+    @Override protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putSerializable(CURRENT_TAG_KEY, currentTag);
+    }
+
+    @Override protected void onPostCreate(@Nullable Bundle state) {
+        super.onPostCreate(state);
+        if (state != null) {
+            Tag savedTag = (Tag) state.getSerializable(CURRENT_TAG_KEY);
+            if (savedTag != null) currentTag = savedTag;
+        }
+        showFragment(currentTag);
+    }
+
+    @Override protected void onStart() {
         super.onStart();
         subscribeToEvents();
     }
 
-    @Override
-    protected void onStop() {
+    @Override protected void onStop() {
         super.onStop();
         eventSubscriptions.clear();
     }
@@ -81,7 +98,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         Subscription loginEvent = eventBus
                 .listenFor(LoginEvent.class)
                 .subscribe(event -> {
-                    setMenuItems();
+                    setDrawerMenuItems();
                     loadUserDetails();
                 });
 
@@ -97,9 +114,45 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 loginEvent, loginPromptEvent, logoutEvent);
     }
 
+    private void showFragment(Tag tag) {
+        FragmentTransaction transaction = fragmentManager.beginTransaction(); //.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+
+        for (Tag t : Tag.values()) {
+            Fragment fragment = fragmentManager.findFragmentByTag(t.name());
+
+            if (t.equals(tag) && fragment == null)
+                transaction.add(container.getId(), createFragment(tag), tag.name());
+            else if (t.equals(tag) && fragment != null)
+                transaction.show(fragment);
+            else if (fragment != null)
+                transaction.hide(fragment);
+        }
+        transaction.commit();
+        currentTag = tag;
+    }
+
+    private Fragment createFragment(Tag tag) {
+        switch (tag) {
+            case PUBLIC_QUESTIONS:
+                return new PublicQuestionFragment();
+            case MY_QUESTIONS:
+                return new MyQuestionsFragment();
+            default:
+                return null;
+        }
+    }
+
     private void initNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
+                case R.id.action_public_questions:
+                    showFragment(Tag.PUBLIC_QUESTIONS);
+                    break;
+
+                case R.id.action_my_questions:
+                    showFragment(Tag.MY_QUESTIONS);
+                    break;
+
                 /** Auth-related items */
                 case R.id.action_login:
                     Intent loginIntent = new Intent(this, ConnectActivity.class);
@@ -118,12 +171,13 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 case R.id.action_logout:
                     credentialStore.delete();
                     Snackbar.make(container, getString(R.string.logout_success), Snackbar.LENGTH_SHORT).show();
-                    setMenuItems();
+                    setDrawerMenuItems();
                     eventBus.send(new LogOutEvent());
                     break;
             }
             drawerLayout.closeDrawers();
             item.setChecked(false);
+            invalidateOptionsMenu();
             return false;
         });
 
@@ -142,7 +196,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
-        setMenuItems();
+        setDrawerMenuItems();
         loadUserDetails();
     }
 
@@ -171,12 +225,11 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         }
     }
 
-    @Override
-    public void onSummaryClicked(Question question) {
+    @Override public void onSummaryClicked(Question question) {
         //manager.openShowFragment(question);
     }
 
-    private void setMenuItems() {
+    private void setDrawerMenuItems() {
         Menu menu = navigationView.getMenu();
         boolean loggedIn = credentialStore.isLoggedIn();
         menu.setGroupVisible(R.id.unauthenticated_group, !loggedIn);
@@ -185,32 +238,39 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         menu.setGroupVisible(R.id.signed_in_group, loggedIn);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        menu.findItem(R.id.action_public_questions).setVisible(
+                currentTag.equals(Tag.MY_QUESTIONS));
+        menu.findItem(R.id.action_my_questions).setVisible(
+                currentTag.equals(Tag.PUBLIC_QUESTIONS));
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 drawerLayout.openDrawer(GravityCompat.START);
                 return true;
 
-            case R.id.action_create:
+            case R.id.action_create_question:
                 promptForLogin(null);
-                return true;
+                break;
 
-            case R.id.action_list:
-                promptForLogin(null);
-                return true;
+            case R.id.action_my_questions:
+                showFragment(Tag.MY_QUESTIONS);
+                break;
+
+            case R.id.action_public_questions:
+                showFragment(Tag.PUBLIC_QUESTIONS);
+                break;
         }
-        return false;
+        invalidateOptionsMenu();
+        return true;
     }
 
     public void promptForLogin(LoginPromptEvent event) {
-        String message = (event != null && event.message != null) ?
+        String message = (event != null && event.getMessage() != null) ?
                 event.getMessage() : getString(R.string.error_unauthorized);
 
         Snackbar.make(toolbar, message, Snackbar.LENGTH_LONG)
@@ -222,23 +282,5 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                     startActivity(intent);
                 })
                 .show();
-    }
-
-    public static class LogOutEvent {
-    }
-
-    public static class LoginPromptEvent {
-        private String message;
-
-        public LoginPromptEvent() {
-        }
-
-        public LoginPromptEvent(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
     }
 }

@@ -63,14 +63,14 @@
                 <EditText
                     android:id="@+id/password_et"
                     style="@style/FormTextField"
-
                     android:layout_width="match_parent"
-
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
                     android:hint="@string/password"
-                    android:inputType="textPassword"
-                    android:text="passer" />
+
+                    android:text="passer"
+
+                    android:inputType="textPassword" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.v7.widget.CardView

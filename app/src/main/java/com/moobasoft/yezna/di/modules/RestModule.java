@@ -9,8 +9,6 @@ import com.moobasoft.yezna.di.scopes.Endpoint;
 import com.moobasoft.yezna.rest.auth.ApiAuthenticator;
 import com.moobasoft.yezna.rest.auth.ApiHeaders;
 import com.moobasoft.yezna.rest.auth.CredentialStore;
-import com.squareup.okhttp.Cache;
-import com.squareup.okhttp.OkHttpClient;
 
 import java.io.File;
 
@@ -18,9 +16,11 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import retrofit.GsonConverterFactory;
-import retrofit.Retrofit;
-import retrofit.RxJavaCallAdapterFactory;
+import okhttp3.Cache;
+import okhttp3.OkHttpClient;
+import retrofit2.GsonConverterFactory;
+import retrofit2.Retrofit;
+import retrofit2.RxJavaCallAdapterFactory;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -30,16 +30,14 @@ public class RestModule {
 
     private static final int DISK_CACHE_SIZE = 8 * 1024 * 1024; //8MB
 
-    @Provides
-    @Singleton
-    Retrofit provideRetrofit(@Endpoint String baseUrl, Gson gson, Context context, CredentialStore store) {
-        final Retrofit retrofit = new Retrofit.Builder()
+    @Provides @Singleton
+    Retrofit provideRetrofit(@Endpoint String baseUrl, OkHttpClient client, Gson gson) {
+        return new Retrofit.Builder()
                 .baseUrl(baseUrl)
+                .client(client)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
-        configureHttpClient(retrofit.client(), context, store);
-        return retrofit;
     }
 
     @Provides @Singleton
@@ -50,20 +48,22 @@ public class RestModule {
         return gson.create();
     }
 
-    private static void configureHttpClient(OkHttpClient client, Context context, CredentialStore store) {
-        client.interceptors().add(new ApiHeaders(context, store));
-        client.setAuthenticator(new ApiAuthenticator(store));
-
-        //if (BuildConfig.DEBUG)
-          //  client.networkInterceptors().add(new StethoInterceptor());
-
-        client.setConnectTimeout(11, SECONDS);
-        client.setReadTimeout(11, SECONDS);
-        client.setWriteTimeout(11, SECONDS);
-
+    @Provides @Singleton
+    OkHttpClient provideOkHttpClient(Context context, CredentialStore store) {
         File cacheDir = new File(context.getCacheDir(), "http");
         Cache cache = new Cache(cacheDir, DISK_CACHE_SIZE);
-     //   client.setCache(cache); // TODO: Enable
+
+        return new OkHttpClient.Builder()
+                .authenticator(new ApiAuthenticator(store))
+                .addInterceptor(new ApiHeaders(context, store))
+                .connectTimeout(10, SECONDS)
+                .readTimeout(10, SECONDS)
+                .writeTimeout(10, SECONDS)
+                //.cache(cache)
+                .build();
+
+        //if (BuildConfig.DEBUG)
+        //  client.networkInterceptors().add(new StethoInterceptor());
     }
 
 }

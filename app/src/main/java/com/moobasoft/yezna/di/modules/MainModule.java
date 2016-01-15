@@ -7,11 +7,11 @@ import com.moobasoft.yezna.rest.services.UserService;
 import com.moobasoft.yezna.ui.RxSchedulers;
 import com.moobasoft.yezna.ui.presenters.ConnectPresenter;
 import com.moobasoft.yezna.ui.presenters.PublicQuestionPresenter;
-import com.moobasoft.yezna.ui.presenters.SummaryPresenter;
+import com.moobasoft.yezna.ui.presenters.MyQuestionsPresenter;
 
 import dagger.Module;
 import dagger.Provides;
-import retrofit.Retrofit;
+import retrofit2.Retrofit;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -26,24 +26,24 @@ public class MainModule {
 
     @PerActivity
     @Provides
-    public PublicQuestionPresenter randomPresenter(RxSchedulers subscriptionManager,
-                                           QuestionService questionService) {
-        return new PublicQuestionPresenter(questionService, subscriptionManager);
+    public PublicQuestionPresenter randomPresenter(RxSchedulers schedulers,
+                                                   QuestionService questionService) {
+        return new PublicQuestionPresenter(questionService, schedulers);
     }
 
     @PerActivity
     @Provides
-    public SummaryPresenter summaryPresenter(RxSchedulers subscriptionManager,
-                                           QuestionService questionService) {
-        return new SummaryPresenter(questionService, subscriptionManager);
+    public MyQuestionsPresenter summaryPresenter(RxSchedulers schedulers,
+                                             UserService userService) {
+        return new MyQuestionsPresenter(userService, schedulers);
     }
 
     @PerActivity
     @Provides
-    public ConnectPresenter loginPresenter(RxSchedulers subscriptionManager,
-                                           UserService userService,
-                                           CredentialStore credentialStore) {
-        return new ConnectPresenter(subscriptionManager, userService, credentialStore);
+    public ConnectPresenter connectPresenter(RxSchedulers schedulers,
+                                             UserService userService,
+                                             CredentialStore credentialStore) {
+        return new ConnectPresenter(schedulers, userService, credentialStore);
     }
 
     @PerActivity

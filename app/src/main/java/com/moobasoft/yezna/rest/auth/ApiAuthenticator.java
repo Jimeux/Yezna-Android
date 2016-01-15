@@ -2,12 +2,12 @@ package com.moobasoft.yezna.rest.auth;
 
 import android.support.annotation.Nullable;
 
-import com.squareup.okhttp.Authenticator;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
 import java.io.IOException;
-import java.net.Proxy;
+
+import okhttp3.Authenticator;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 
 public class ApiAuthenticator implements Authenticator {
 
@@ -26,8 +26,8 @@ public class ApiAuthenticator implements Authenticator {
      *    the user is asked to login.
      */
     @Override
-    public Request authenticate(Proxy proxy, Response response) throws IOException {
-        if (response.request().url().getPath().contains("oauth") ||
+    public Request authenticate(Route route, Response response) throws IOException {
+        if (response.request().url().encodedPath().contains("oauth") ||
             !response.message().trim().equalsIgnoreCase("Unauthorized"))
             return null;
 
@@ -52,11 +52,6 @@ public class ApiAuthenticator implements Authenticator {
         } catch (NullPointerException | RetrofitError error) {
             return null;
         }*/
-        return null;
-    }
-
-    @Override
-    public Request authenticateProxy(Proxy proxy, Response response) throws IOException {
         return null;
     }
 }

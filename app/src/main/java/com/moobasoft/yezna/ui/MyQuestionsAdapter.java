@@ -8,14 +8,14 @@ import android.view.ViewGroup;
 
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.models.Question;
-import com.moobasoft.yezna.ui.views.SummaryView;
+import com.moobasoft.yezna.ui.views.MyQuestionView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.support.v7.widget.RecyclerView.ViewHolder;
 
-public class SummaryAdapter extends RecyclerView.Adapter<ViewHolder> {
+public class MyQuestionsAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     public static final int ID_PREFIX     = 12345678;
     public static final int TYPE_NORMAL   = 1;
@@ -25,12 +25,12 @@ public class SummaryAdapter extends RecyclerView.Adapter<ViewHolder> {
     private SummaryClickListener summaryClickListener;
     private ArrayList<Question> questionList;
 
-    public SummaryAdapter(SummaryClickListener summaryClickListener) {
+    public MyQuestionsAdapter(SummaryClickListener summaryClickListener) {
         this.summaryClickListener = summaryClickListener;
         this.questionList = new ArrayList<>();
     }
 
-    public ArrayList<Question> getSummaryList() {
+    public ArrayList<Question> getQuestionsList() {
         return questionList;
     }
 
@@ -47,9 +47,9 @@ public class SummaryAdapter extends RecyclerView.Adapter<ViewHolder> {
                     .inflate(R.layout.element_list_footer, parent, false);
             return new FooterHolder(view);
         } else {
-            SummaryView view = (SummaryView) LayoutInflater
+            MyQuestionView view = (MyQuestionView) LayoutInflater
                     .from(parent.getContext())
-                    .inflate(R.layout.view_summary, parent, false);
+                    .inflate(R.layout.view_my_question, parent, false);
             return new SummaryViewHolder(view);
         }
     }
@@ -97,9 +97,9 @@ public class SummaryAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     class SummaryViewHolder extends ViewHolder {
 
-        private final SummaryView itemView;
+        private final MyQuestionView itemView;
 
-        public SummaryViewHolder(SummaryView itemView) {
+        public SummaryViewHolder(MyQuestionView itemView) {
             super(itemView);
             this.itemView = itemView;
         }

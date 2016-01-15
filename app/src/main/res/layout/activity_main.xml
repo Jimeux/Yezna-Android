@@ -57,4 +57,22 @@
         app:menu="@menu/menu_drawer" />
 </android.support.v4.widget.DrawerLayout>
 
-<!--app:layout_scrollFlags="scroll|enterAlways"--><!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+<!--app:layout_scrollFlags="scroll|enterAlways"-->
+    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+<!--
+    TODO: Needs to be called after config changes too
+    private void setScrollBehaviour(boolean scrollable) {
+    if (!scrollable) appBarLayout.setExpanded(true, false);
+
+    AppBarLayout.ScrollingViewBehavior behavior = (scrollable) ?
+    new AppBarLayout.ScrollingViewBehavior() : null;
+
+    CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams)
+    container.getLayoutParams();
+    layoutParams.setBehavior(behavior);
+
+    int flags = (scrollable) ? SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS : 0;
+
+    AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+    params.setScrollFlags(flags);
+    }-->

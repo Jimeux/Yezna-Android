@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.moobasoft.yezna.App;
-import com.moobasoft.yezna.EventBus;
+import com.moobasoft.yezna.events.EventBus;
 import com.moobasoft.yezna.rest.auth.CredentialStore;
 
 import javax.inject.Singleton;

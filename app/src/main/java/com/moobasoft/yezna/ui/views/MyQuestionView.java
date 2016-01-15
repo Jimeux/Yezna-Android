@@ -3,8 +3,6 @@ package com.moobasoft.yezna.ui.views;
 import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,18 +13,15 @@ import com.moobasoft.yezna.rest.models.Question;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-import static com.moobasoft.yezna.ui.SummaryAdapter.SummaryClickListener;
+import static com.moobasoft.yezna.ui.MyQuestionsAdapter.SummaryClickListener;
 
-public final class SummaryView extends CardView {
+public final class MyQuestionView extends CardView {
     @Bind(R.id.image)       ImageView imageIv;
-    @Bind(R.id.avatar)      ImageView avatarIv;
-    @Bind(R.id.username)    TextView  usernameTv;
     @Bind(R.id.question)    TextView  questionTv;
     @Bind(R.id.result)      TextView  resultTv;
     @Bind(R.id.date)        TextView  dateTv;
-    @Bind(R.id.answer_btns) ViewGroup answerBtnsLayout;
 
-    public SummaryView(Context context, AttributeSet attrs) {
+    public MyQuestionView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -35,28 +30,11 @@ public final class SummaryView extends CardView {
         ButterKnife.bind(this);
     }
 
-    public void toggleAnswerBtns() {
-        boolean visible = answerBtnsLayout.getVisibility() == View.VISIBLE;
-        answerBtnsLayout.setVisibility(visible ? View.GONE : View.VISIBLE);
-    }
-
     public void bindTo(Question question, SummaryClickListener listener) {
-        //answerBtnsLayout.setVisibility(View.GONE);
-
-        if (question.getUser() != null) {
-            usernameTv.setText(question.getUser().getUsername());
-            if (question.getUser().getAvatar() != null)
-                Glide.with(getContext())
-                        .load(question.getUser().getAvatar())
-                        .into(avatarIv);
-        }
-
         if (question.getImage() != null)
             Glide.with(getContext())
                     .load(question.getImage())
                     .into(imageIv);
-
-        //imageIv.setVisibility(GONE);
 
         questionTv.setText(question.getQuestion());
         dateTv.setText(question.getCreatedAt());

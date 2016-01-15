@@ -1,4 +1,4 @@
-package com.moobasoft.yezna;
+package com.moobasoft.yezna.events;
 
 import rx.Observable;
 import rx.subjects.PublishSubject;
