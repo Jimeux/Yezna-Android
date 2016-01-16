@@ -110,7 +110,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
         Subscription logoutEvent = eventBus
                 .listenFor(LogOutEvent.class)
-                .subscribe(this::clearUserDetails);
+                .subscribe(this::handleLogOut);
 
         Subscription createdEvent = eventBus
                 .listenFor(QuestionCreatedEvent.class)
@@ -121,20 +121,25 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     }
 
     private void showFragment(Tag tag) {
-        FragmentTransaction transaction = fragmentManager.beginTransaction(); //.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+        if (!tag.equals(Tag.PUBLIC_QUESTIONS) && !credentialStore.isLoggedIn())
+            promptForLogin(null);
+        else {
+            FragmentTransaction transaction = fragmentManager.beginTransaction(); //.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
 
-        for (Tag t : Tag.values()) {
-            Fragment fragment = fragmentManager.findFragmentByTag(t.name());
+            for (Tag t : Tag.values()) {
+                Fragment fragment = fragmentManager.findFragmentByTag(t.name());
 
-            if (t.equals(tag) && fragment == null)
-                transaction.add(container.getId(), createFragment(tag), tag.name());
-            else if (t.equals(tag) && fragment != null)
-                transaction.show(fragment);
-            else if (fragment != null)
-                transaction.hide(fragment);
+                if (t.equals(tag) && fragment == null)
+                    transaction.add(container.getId(), createFragment(tag), tag.name());
+                else if (t.equals(tag) && fragment != null)
+                    transaction.show(fragment);
+                else if (fragment != null)
+                    transaction.hide(fragment);
+            }
+            transaction.commit();
+            currentTag = tag;
+            invalidateOptionsMenu();
         }
-        transaction.commit();
-        currentTag = tag;
     }
 
     private Fragment createFragment(Tag tag) {
@@ -169,14 +174,14 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 case R.id.action_login:
                     Intent loginIntent = new Intent(this, ConnectActivity.class);
                     loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    loginIntent.putExtra(ConnectActivity.REGISTER, false);
+                    loginIntent.putExtra(ConnectActivity.REGISTER_MODE_KEY, false);
                     startActivity(loginIntent);
                     break;
 
                 case R.id.action_register:
                     Intent registerIntent = new Intent(this, ConnectActivity.class);
                     registerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    registerIntent.putExtra(ConnectActivity.REGISTER, true);
+                    registerIntent.putExtra(ConnectActivity.REGISTER_MODE_KEY, true);
                     startActivity(registerIntent);
                     break;
 
@@ -189,8 +194,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
             }
             drawerLayout.closeDrawers();
             item.setChecked(false);
-            invalidateOptionsMenu();
-            return false;
+            return false; // False to avoid checking items
         });
 
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(
@@ -212,12 +216,14 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         loadUserDetails();
     }
 
-    private void clearUserDetails(LogOutEvent event) {
+    private void handleLogOut(LogOutEvent event) {
+        showFragment(Tag.PUBLIC_QUESTIONS);
         View header = navigationView.getHeaderView(0);
         TextView username = (TextView) header.findViewById(R.id.username);
         username.setText(getString(R.string.not_signed_in));
         ImageView avatar = (ImageView) header.findViewById(R.id.avatar);
         avatar.setImageDrawable(null);
+        invalidateOptionsMenu();
     }
 
     private void loadUserDetails() {
@@ -279,7 +285,6 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 showFragment(Tag.PUBLIC_QUESTIONS);
                 break;
         }
-        invalidateOptionsMenu();
         return true;
     }
 
@@ -292,7 +297,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 .setAction(getString(R.string.login), v -> {
                     Intent intent = new Intent(MainActivity.this, ConnectActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ConnectActivity.REGISTER, false);
+                    intent.putExtra(ConnectActivity.REGISTER_MODE_KEY, false);
                     startActivity(intent);
                 })
                 .show();

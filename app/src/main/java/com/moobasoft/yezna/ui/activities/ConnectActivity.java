@@ -9,13 +9,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.moobasoft.yezna.App;
-import com.moobasoft.yezna.ui.fragments.PresenterRetainer;
 import com.moobasoft.yezna.R;
-import com.moobasoft.yezna.di.components.DaggerMainComponent;
-import com.moobasoft.yezna.di.modules.MainModule;
 import com.moobasoft.yezna.events.auth.LoginEvent;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
+import com.moobasoft.yezna.ui.fragments.PresenterRetainer;
 import com.moobasoft.yezna.ui.presenters.ConnectPresenter;
 
 import java.util.List;
@@ -32,23 +29,17 @@ import static android.view.View.VISIBLE;
 public class ConnectActivity extends BaseActivity implements ConnectPresenter.View {
 
     public static final String PROCESSING_KEY = "processing_key";
+    public static final String REGISTER_MODE_KEY = "register_mode_key";
+    public static final String RETAINER_TAG = "connect_retainer_tag";
+
+    /**
+     * Track if a request is currently in progress
+     */
     private boolean processing;
-
-    @Override protected void onSaveInstanceState(Bundle state) {
-        super.onSaveInstanceState(state);
-        state.putBoolean(PROCESSING_KEY, processing);
-    }
-
-    @Override protected void onRestoreInstanceState(Bundle state) {
-        super.onRestoreInstanceState(state);
-        if (state != null) {
-            processing = state.getBoolean(PROCESSING_KEY);
-            setProcessing(processing);
-        }
-    }
-
-    public static final String REGISTER = "form";
-    public static final String RETAINER = "connect_retainer";
+    /**
+     * Track if the register or login form should be displayed
+     */
+    private boolean isRegisterMode;
 
     @Inject ConnectPresenter presenter;
 
@@ -62,48 +53,52 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     @Bind({R.id.username_et, R.id.email_et, R.id.password_et})
     List<EditText> inputFields;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect);
         ButterKnife.bind(this);
-        initialiseInjector();
+        getComponent().inject(this);
+        initialisePresenter();
+        isRegisterMode = getIntent().getBooleanExtra(REGISTER_MODE_KEY, true);
+        initialiseForm();
+    }
 
-        Fragment retainer = getFragmentManager().findFragmentByTag(RETAINER);
+    @Override protected void onRestoreInstanceState(Bundle state) {
+        super.onRestoreInstanceState(state);
+        if (state != null) {
+            processing = state.getBoolean(PROCESSING_KEY);
+            setProcessing(processing);
+        }
+    }
+
+    @Override protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putBoolean(PROCESSING_KEY, processing);
+        getIntent().putExtra(REGISTER_MODE_KEY, isRegisterMode);
+    }
+
+    @Override protected void onDestroy() {
+        presenter.releaseView();
+        super.onDestroy();
+    }
+
+    private void initialisePresenter() {
+        Fragment retainer = getFragmentManager().findFragmentByTag(RETAINER_TAG);
         if (retainer == null) {
             PresenterRetainer<ConnectPresenter> presenterRetainer = new PresenterRetainer<>();
             presenterRetainer.put(presenter);
             getFragmentManager()
                     .beginTransaction()
-                    .add(presenterRetainer, RETAINER)
+                    .add(presenterRetainer, RETAINER_TAG)
                     .commit();
         } else {
             presenter = (ConnectPresenter) ((PresenterRetainer) retainer).get();
         }
-
         presenter.bindView(this);
-        boolean isRegisterForm = getIntent().getBooleanExtra(REGISTER, true);
-        switchForms(isRegisterForm);
-        //ViewCompat.setTranslationZ(progressBar, 5);
-        //progressBar.getIndeterminateDrawable()
-        //      .setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
     }
 
-    private void initialiseInjector() {
-        DaggerMainComponent.builder()
-                .mainModule(new MainModule())
-                .appComponent(((App) getApplication()).getAppComponent())
-                .build().inject(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        presenter.releaseView();
-        super.onDestroy();
-    }
-
-    private void switchForms(boolean loginForm) {
-        if (loginForm) {
+    private void initialiseForm() {
+        if (isRegisterMode) {
             emailLabel.setVisibility(VISIBLE);
             emailEt.setVisibility(VISIBLE);
             primaryBtn.setText(getString(R.string.register));
@@ -122,42 +117,26 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
         passwordEt.setError(null);
     }
 
-    private boolean isLoginForm() {
-        return emailEt.getVisibility() == GONE;
-    }
-
-    @Override
-    public void onLogin() {
-        Toast.makeText(this, getString(R.string.login_success), Toast.LENGTH_SHORT)
-                .show();
+    @Override public void onLogin() {
+        Toast.makeText(this, getString(R.string.login_success), Toast.LENGTH_SHORT).show();
         eventBus.send(new LoginEvent());
         finish();
     }
 
-    @Override
-    public void onRegister(String username) {
-        Toast.makeText(this, getString(R.string.register_success, username), Toast.LENGTH_LONG).show();
-        eventBus.send(new LoginEvent());
-        finish();
-    }
-
-    @Override
-    public void onLoginError() {
+    @Override public void onLoginError() {
         setProcessing(false);
         usernameEt.setError(getString(R.string.login_error));
         usernameEt.requestFocus();
     }
 
-    @Override
-    public void onError(int error) {
+    @Override public void onError(int error) {
         setProcessing(false);
         Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void onRegistrationError(@Nullable String username,
-                                    @Nullable String email,
-                                    @Nullable String password) {
+    @Override public void onRegistrationError(@Nullable String username,
+                                              @Nullable String email,
+                                              @Nullable String password) {
         setProcessing(false);
         usernameEt.setError(username);
         emailEt.setError(email);
@@ -171,7 +150,8 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
         }
     }
 
-    @Override public void promptForLogin() {}
+    @Override public void promptForLogin() {
+    }
 
     private void setProcessing(boolean processing) {
         this.processing = processing;
@@ -186,7 +166,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
             primaryBtn.setText(getString(R.string.loading));
             primaryBtn.setBackgroundColor(getResources().getColor(R.color.red300));
         } else {
-            int stringId = isLoginForm() ? R.string.login : R.string.register;
+            int stringId = isRegisterMode ? R.string.register : R.string.login;
             primaryBtn.setText(getString(stringId));
             primaryBtn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
@@ -196,21 +176,23 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     public void clickPrimaryButton() {
         clearErrors();
         setProcessing(true);
+
         //TODO: validation
-        if (isLoginForm()) {
-            presenter.login(usernameEt.getText().toString(),
-                    passwordEt.getText().toString());
-        } else {
+        if (isRegisterMode) {
             presenter.register(emailEt.getText().toString(),
                     usernameEt.getText().toString(),
+                    passwordEt.getText().toString());
+        } else {
+            presenter.login(usernameEt.getText().toString(),
                     passwordEt.getText().toString());
         }
     }
 
     @OnClick(R.id.btn_secondary)
     public void clickSecondaryButton() {
+        isRegisterMode = !isRegisterMode;
         clearErrors();
-        switchForms(isLoginForm());
+        initialiseForm();
     }
 
     @OnClick(R.id.btn_close)

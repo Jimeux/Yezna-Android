@@ -58,5 +58,6 @@
 
 
     <string name="ask_btn">Ask the world</string>
+    <string name="no_image_selected">You haven\'t picked an image</string>
 
 </resources>

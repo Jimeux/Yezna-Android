@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,8 +21,8 @@ public final class PublicQuestionView extends CardView {
     @Bind(R.id.question)    TextView  questionTv;
     @Bind(R.id.result)      TextView  resultTv;
     @Bind(R.id.date)        TextView  dateTv;
-    @Bind(R.id.no_btn)      Button noButton;
-    @Bind(R.id.yes_btn)     Button yesButton;
+    @Bind(R.id.no_btn)      TextView noButton;
+    @Bind(R.id.yes_btn)     TextView yesButton;
 
     public interface QuestionClickListener {
         void onAnswerQuestion(Question question, View view, boolean yes);

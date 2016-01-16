@@ -1,6 +1,12 @@
 package com.moobasoft.yezna.ui.fragments;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +44,9 @@ public class AskQuestionFragment extends RxFragment implements AskQuestionPresen
     @Bind(R.id.time_limit) Spinner timeLimitSpinner;
     @Bind(R.id.processing_view) ViewGroup processingView;
 
+    private String imagePath;
+    private String imageUrl;
+
     public AskQuestionFragment() {}
 
     @OnClick(R.id.ask_btn) public void clickAskButton() {
@@ -46,7 +55,7 @@ public class AskQuestionFragment extends RxFragment implements AskQuestionPresen
         boolean isPublic      = publicCb.isChecked();
         int timeLimit         = timeLimitSpinner.getSelectedItemPosition();
 
-        presenter.askQuestion(questionString, isPublic, timeLimit);
+        presenter.askQuestion(questionString, isPublic, timeLimit, imagePath);
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
@@ -121,4 +130,54 @@ public class AskQuestionFragment extends RxFragment implements AskQuestionPresen
 
     @Override public void onRefresh() {
     }
+
+
+
+
+    public static final int SELECT_PICTURE = 531367;
+
+    @OnClick(R.id.image_btn)
+    public void imageButtonClicked() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, SELECT_PICTURE);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        try {
+            if (requestCode == SELECT_PICTURE && resultCode == Activity.RESULT_OK && null != data) {
+                String picturePath = getImagePath(data);
+
+                if (picturePath != null) {
+                    if (picturePath.contains("http"))
+                        imageUrl = picturePath;
+                    else
+                        imagePath = picturePath;
+                }
+            } else {
+                Snackbar.make(contentView, getString(R.string.no_image_selected), Snackbar.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            Snackbar.make(contentView, e.getMessage(), Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    private String getImagePath(Intent data) {
+        Uri uri = data.getData();
+        String[] projection = { MediaStore.Images.Media.DATA };
+
+        Cursor cursor = getActivity().getContentResolver()
+                .query(uri, projection, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();   //TODO: Null checks
+            int columnIndex = cursor.getColumnIndex(projection[0]);
+            String picturePath = cursor.getString(columnIndex); // returns null
+            cursor.close();
+            return picturePath;
+        }
+        return null;
+    }
+
 }

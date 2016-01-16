@@ -82,11 +82,6 @@ public class PublicQuestionsFragment extends RxFragment
             activateContentView();
     }
 
-    @Override public void onStart() {
-        super.onStart();
-        subscribeToEvents();
-    }
-
     @Override public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
         state.putParcelableArrayList(QUESTIONS_KEY, questions);
@@ -101,7 +96,7 @@ public class PublicQuestionsFragment extends RxFragment
     @Override protected void subscribeToEvents() {
         Subscription loginEventSubscription =
                 eventBus.listenFor(LoginEvent.class)
-                        .subscribe(event -> onRefresh());
+                        .subscribe(event -> onRefresh()); //TODO: Error handling?
 
         Subscription logOutEventSubscription =
                 eventBus.listenFor(LogOutEvent.class)

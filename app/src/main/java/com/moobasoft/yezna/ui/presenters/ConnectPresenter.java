@@ -21,7 +21,7 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
 
     public interface View extends RxPresenter.RxView {
         void onLogin();
-        void onRegister(String username);
+        //void onRegister(String username);
         void onLoginError();
         void onRegistrationError(String username, String email, String password);
     }

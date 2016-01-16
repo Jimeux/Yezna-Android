@@ -30,6 +30,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
 
+            android:text="Is this going to work?"
+
             android:layout_marginTop="40dp"
             android:gravity="top"
             android:imeOptions="actionDone"
@@ -46,7 +48,6 @@
             android:textSize="18sp"/>
 
         <Spinner
-            android:visibility="gone"
             android:id="@+id/time_limit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -61,6 +62,15 @@
             android:layout_marginTop="10dp"
             android:checked="true"
             android:text="@string/public_checkbox"/>
+
+        <Button
+            android:id="@+id/image_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:text="Add an image"
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/white"/>
 
         <Button
             android:id="@+id/ask_btn"

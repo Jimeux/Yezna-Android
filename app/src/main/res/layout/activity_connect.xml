@@ -1,14 +1,14 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/white"
-    android:gravity="center"
-    android:maxWidth="380dp"
-    android:minWidth="350dp"
-    android:orientation="vertical"
-    tools:context="com.moobasoft.helloeigo.ui.activities.ConnectActivity">
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:gravity="center"
+            android:maxWidth="380dp"
+            android:minWidth="350dp"
+            android:orientation="vertical"
+            tools:context="com.moobasoft.helloeigo.ui.activities.ConnectActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
             android:paddingRight="20dp"
             android:paddingTop="20dp"
             android:src="@drawable/ic_close_white_24dp"
-            android:tint="@color/grey500" />
+            android:tint="@color/grey500"/>
 
         <LinearLayout
             android:id="@+id/main_form"
@@ -44,7 +44,7 @@
                     android:hint="@string/username"
 
                     android:inputType="text"
-                    android:text="jim" />
+                    android:text="jim"/>
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -55,7 +55,7 @@
                     android:id="@+id/email_et"
                     style="@style/FormTextField"
                     android:hint="@string/email"
-                    android:inputType="textEmailAddress" />
+                    android:inputType="textEmailAddress"/>
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout style="@style/FormLabel">
@@ -68,32 +68,33 @@
                     android:layout_marginBottom="20dp"
                     android:hint="@string/password"
 
-                    android:text="passer"
+                    android:inputType="textPassword"
 
-                    android:inputType="textPassword" />
+                    android:text="passer"/>
             </android.support.design.widget.TextInputLayout>
 
-            <android.support.v7.widget.CardView
+            <com.balysv.materialripple.MaterialRippleLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginTop="10dp"
-                app:cardElevation="1dp">
+                app:mrl_rippleColor="@color/colorPrimaryDark"
+                app:mrl_rippleDelayClick="false"
+                app:mrl_rippleBackground="@color/colorPrimary"
+                app:mrl_rippleRoundedCorners="2dp">
                 <TextView
                     android:id="@+id/btn_primary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorPrimary"
                     android:clickable="true"
-                    android:foreground="?android:attr/selectableItemBackground"
                     android:paddingBottom="6dp"
                     android:paddingLeft="22dp"
                     android:paddingRight="22dp"
                     android:paddingTop="6dp"
                     android:text="@string/register"
                     android:textColor="@color/white"
-                    android:textSize="15sp" />
-            </android.support.v7.widget.CardView>
+                    android:textSize="15sp"/>
+            </com.balysv.materialripple.MaterialRippleLayout>
 
         </LinearLayout>
 
@@ -102,23 +103,29 @@
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
             android:layout_below="@id/main_form"
-            android:layout_marginBottom="15dp"
             android:layout_marginTop="10dp"
-            android:background="@color/grey300" />
+            android:background="@color/grey300"/>
 
-        <TextView
-            android:id="@+id/btn_secondary"
-            android:layout_width="wrap_content"
+        <com.balysv.materialripple.MaterialRippleLayout
+            android:id="@+id/ripple"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/divider"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center"
-            android:layout_marginBottom="15dp"
-            android:clickable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:text="@string/login"
-            android:textColor="@color/grey500"
-            android:textSize="14sp" />
+            app:mrl_rippleColor="@color/grey300"
+            app:mrl_rippleDelayClick="false">
+
+            <TextView
+                android:id="@+id/btn_secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:gravity="center"
+                android:padding="15dp"
+                android:text="@string/login"
+                android:textColor="@color/grey600"
+                android:textSize="14sp"/>
+        </com.balysv.materialripple.MaterialRippleLayout>
 
     </RelativeLayout>
 </ScrollView>
