@@ -17,7 +17,7 @@
 
     <item
         android:id="@+id/action_ask_question"
-        android:title="@string/create_question"
+        android:title="@string/ask_question"
         android:orderInCategory="102"
         android:icon="@drawable/ic_edit_white_24dp"
         app:showAsAction="ifRoom" />

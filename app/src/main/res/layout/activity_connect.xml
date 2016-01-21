@@ -1,6 +1,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/login_page"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
@@ -40,11 +41,8 @@
                 <EditText
                     android:id="@+id/username_et"
                     style="@style/FormTextField"
-
                     android:hint="@string/username"
-
-                    android:inputType="text"
-                    android:text="jim"/>
+                    android:inputType="text"/>
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -67,10 +65,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
                     android:hint="@string/password"
-
-                    android:inputType="textPassword"
-
-                    android:text="passer"/>
+                    android:inputType="textPassword"/>
             </android.support.design.widget.TextInputLayout>
 
             <com.balysv.materialripple.MaterialRippleLayout

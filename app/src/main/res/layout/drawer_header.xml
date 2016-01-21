@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
@@ -10,33 +12,33 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="27dp"
-        android:adjustViewBounds="true"
         android:layout_marginBottom="16dp"
-        android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="16dp"
+        android:layout_marginTop="20dp"
+        android:adjustViewBounds="true"
         android:src="@drawable/yezna_logo"/>
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/avatar"
-        android:src="@color/red200"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginTop="10dp"
         android:layout_marginBottom="0dp"
         android:layout_marginLeft="20dp"
-        android:layout_marginRight="16dp"/>
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="10dp"
+        android:src="@color/red200"/>
 
     <!--fontPath="fonts/Roboto-Medium.ttf"-->
 
     <TextView
-        android:id="@+id/username"
+        android:id="@+id/signed_in_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
         android:layout_marginBottom="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="16dp"
+        android:layout_marginTop="15dp"
         android:text="@string/not_signed_in"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
 

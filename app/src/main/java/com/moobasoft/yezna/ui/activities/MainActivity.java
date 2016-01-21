@@ -219,7 +219,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     private void handleLogOut(LogOutEvent event) {
         showFragment(Tag.PUBLIC_QUESTIONS);
         View header = navigationView.getHeaderView(0);
-        TextView username = (TextView) header.findViewById(R.id.username);
+        TextView username = (TextView) header.findViewById(R.id.signed_in_username);
         username.setText(getString(R.string.not_signed_in));
         ImageView avatar = (ImageView) header.findViewById(R.id.avatar);
         avatar.setImageDrawable(null);
@@ -232,7 +232,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         if (user != null) {
             View header = navigationView.getHeaderView(0);
 
-            TextView username = (TextView) header.findViewById(R.id.username);
+            TextView username = (TextView) header.findViewById(R.id.signed_in_username);
             username.setText(getString(R.string.signed_in_as, user.getUsername()));
 
             ImageView avatar = (ImageView) header.findViewById(R.id.avatar);

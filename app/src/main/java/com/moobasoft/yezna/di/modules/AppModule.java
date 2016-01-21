@@ -44,7 +44,7 @@ public class AppModule {
 
     @Provides
     @Singleton
-    CredentialStore credentialStore(SharedPreferences preferences) {
+    protected CredentialStore provideCredentialStore(SharedPreferences preferences) {
         return new CredentialStore(preferences);
     }
 
