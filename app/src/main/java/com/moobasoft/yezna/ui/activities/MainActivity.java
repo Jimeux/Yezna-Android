@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
@@ -13,6 +14,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.transition.Fade;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -129,8 +131,13 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
             for (Tag t : Tag.values()) {
                 Fragment fragment = fragmentManager.findFragmentByTag(t.name());
 
-                if (t.equals(tag) && fragment == null)
-                    transaction.add(container.getId(), createFragment(tag), tag.name());
+                if (t.equals(tag) && fragment == null) {
+                    fragment = createFragment(tag);
+                    /*fragment.setExitTransition(new Fade(Fade.OUT));
+                    fragment.setEnterTransition(new Fade(Fade.IN));
+                    fragment.setReturnTransition(new Fade(Fade.IN));*/
+                    transaction.add(container.getId(), fragment, tag.name());
+                }
                 else if (t.equals(tag) && fragment != null)
                     transaction.show(fragment);
                 else if (fragment != null)
@@ -142,7 +149,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         }
     }
 
-    private Fragment createFragment(Tag tag) {
+    private Fragment createFragment(@NonNull Tag tag) {
         switch (tag) {
             case PUBLIC_QUESTIONS:
                 return new PublicQuestionsFragment();

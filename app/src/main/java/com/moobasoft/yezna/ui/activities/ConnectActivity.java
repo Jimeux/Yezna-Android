@@ -1,9 +1,14 @@
 package com.moobasoft.yezna.ui.activities;
 
+import android.animation.Animator;
 import android.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -33,7 +38,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     public static final String RETAINER_TAG = "connect_retainer_tag";
 
     /**
-     * Track if a request is currently in progress
+     * Track if a network request is currently in progress
      */
     private boolean processing;
     /**
@@ -43,6 +48,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
 
     @Inject ConnectPresenter presenter;
 
+    @Bind(R.id.main_connect_view) ViewGroup mainLayout;
     @Bind(R.id.btn_close) ImageView closeBtn;
     @Bind(R.id.btn_primary) TextView primaryBtn;
     @Bind(R.id.btn_secondary) TextView secondaryBtn;
@@ -53,14 +59,41 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     @Bind({R.id.username_et, R.id.email_et, R.id.password_et})
     List<EditText> inputFields;
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    @Override protected void onCreate(final Bundle state) {
+        super.onCreate(state);
         setContentView(R.layout.activity_connect);
         ButterKnife.bind(this);
         getComponent().inject(this);
         initialisePresenter();
         isRegisterMode = getIntent().getBooleanExtra(REGISTER_MODE_KEY, true);
         initialiseForm();
+
+        mainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override public void onGlobalLayout() {
+                if (state == null)
+                    reveal();
+                else
+                    mainLayout.setVisibility(View.VISIBLE);
+                // for SDK >= 16
+                mainLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+    }
+
+    private void reveal() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            int cx = mainLayout.getWidth() / 2;
+            int cy = mainLayout.getHeight() / 2;
+            float finalRadius = (float) Math.hypot(cx, cy);
+
+            Animator anim = ViewAnimationUtils
+                    .createCircularReveal(mainLayout, cx, cy, 0, finalRadius);
+            mainLayout.setVisibility(View.VISIBLE);
+            anim.start();
+        }
+
+        if (mainLayout.getVisibility() != View.VISIBLE)
+            mainLayout.setVisibility(View.VISIBLE);
     }
 
     @Override protected void onRestoreInstanceState(Bundle state) {
@@ -170,6 +203,11 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
             primaryBtn.setText(getString(stringId));
             primaryBtn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
+    }
+
+    @OnClick(R.id.login_page)
+    public void clickBackdrop() {
+        if (!processing) finish();
     }
 
     @OnClick(R.id.btn_primary)
