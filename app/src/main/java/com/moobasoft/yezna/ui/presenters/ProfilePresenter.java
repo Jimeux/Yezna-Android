@@ -30,7 +30,7 @@ public class ProfilePresenter extends RxPresenter<ProfilePresenter.View> {
 
     public void updateProfile(String username, String email, String password, String imagePath) {
 
-        /*RequestBody usernameRb = null;
+        RequestBody usernameRb = null;
         if (!TextUtils.isEmpty(username))
             usernameRb = RequestBody.create(MediaType.parse("text/plain"), username);
 
@@ -40,7 +40,7 @@ public class ProfilePresenter extends RxPresenter<ProfilePresenter.View> {
 
         RequestBody passwordRb = null;
         if (!TextUtils.isEmpty(password))
-            passwordRb = RequestBody.create(MediaType.parse("text/plain"), password);*/
+            passwordRb = RequestBody.create(MediaType.parse("text/plain"), password);
 
         RequestBody avatarRb = null;
         if (!TextUtils.isEmpty(imagePath)) {
@@ -49,7 +49,7 @@ public class ProfilePresenter extends RxPresenter<ProfilePresenter.View> {
         }
 
         Subscription createSubscription = userService
-                .updateProfile(username, email, password, avatarRb)
+                .updateProfile(usernameRb, emailRb, passwordRb, avatarRb)
                 .compose(rxSchedulers.applySchedulers())
                 .subscribe(view::onProfileUpdated, this::handleError);
 

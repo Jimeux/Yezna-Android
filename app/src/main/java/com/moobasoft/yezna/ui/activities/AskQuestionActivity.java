@@ -1,13 +1,8 @@
 package com.moobasoft.yezna.ui.activities;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
@@ -26,6 +21,7 @@ import com.moobasoft.yezna.events.ask.QuestionCreatedEvent;
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
 import com.moobasoft.yezna.ui.presenters.AskQuestionPresenter;
+import com.moobasoft.yezna.util.ImageUtil;
 import com.moobasoft.yezna.util.Util;
 
 import javax.inject.Inject;
@@ -143,53 +139,20 @@ public class AskQuestionActivity extends BaseActivity implements AskQuestionPres
         presenter.askQuestion(questionString, isPublic, timeLimit, imagePath);
     }
 
-
-
-
-    // TODO: Refactor
-
-    public static final int SELECT_PICTURE = 531;
-
     @OnClick(R.id.image_btn)
     public void imageButtonClicked() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, SELECT_PICTURE);
+        startActivityForResult(galleryIntent, ImageUtil.SELECT_PICTURE);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        try {
-            if (requestCode == SELECT_PICTURE && resultCode == Activity.RESULT_OK && null != data) {
-                String picturePath = getImagePath(data);
+        ImageUtil.ImageResult result = ImageUtil
+                .onImageSelected(this.getApplicationContext(), requestCode, resultCode, data, toolbar);
 
-                if (picturePath != null) {
-                    if (picturePath.contains("http"))
-                        imageUrl = picturePath;
-                    else
-                        imagePath = picturePath;
-                }
-            } else {
-                Snackbar.make(toolbar, getString(R.string.no_image_selected), Snackbar.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            Snackbar.make(toolbar, e.getMessage(), Snackbar.LENGTH_LONG).show();
-        }
+        imagePath = result.imagePath;
+        imageUrl = result.imageUrl;
     }
 
-    private String getImagePath(Intent data) {
-        Uri uri = data.getData();
-        String[] projection = {MediaStore.Images.Media.DATA};
-
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-
-        if (cursor != null) {
-            cursor.moveToFirst();   //TODO: Null checks
-            int columnIndex = cursor.getColumnIndex(projection[0]);
-            String picturePath = cursor.getString(columnIndex); // returns null
-            cursor.close();
-            return picturePath;
-        }
-        return null;
-    }
 }

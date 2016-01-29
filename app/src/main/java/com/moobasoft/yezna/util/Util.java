@@ -6,6 +6,8 @@ import android.widget.EditText;
 
 public class Util {
 
+    private Util() {}
+
     public static void setImeVisibility(final boolean visible, final EditText editText) {
         Runnable mShowImeRunnable = new Runnable() {
             @Override

@@ -32,6 +32,7 @@ import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.rest.models.User;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
 import com.moobasoft.yezna.ui.fragments.MyQuestionsFragment;
+import com.moobasoft.yezna.ui.fragments.ProfileFragment;
 import com.moobasoft.yezna.ui.fragments.PublicQuestionsFragment;
 
 import javax.inject.Inject;
@@ -151,6 +152,8 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 return new PublicQuestionsFragment();
             case MY_QUESTIONS:
                 return new MyQuestionsFragment();
+            case PROFILE:
+                return new ProfileFragment();
             default:
                 return null;
         }
@@ -249,6 +252,10 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
             case R.id.action_my_questions:
                 showFragment(Tag.MY_QUESTIONS);
+                break;
+
+            case R.id.action_profile:
+                showFragment(Tag.PROFILE);
                 break;
 
             case R.id.action_ask_question:
