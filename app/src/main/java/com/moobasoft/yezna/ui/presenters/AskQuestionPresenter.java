@@ -30,16 +30,23 @@ public class AskQuestionPresenter extends RxPresenter<AskQuestionPresenter.View>
     }
 
     public void askQuestion(String question, boolean isPublic, int timeLimit, String imagePath) {
-        if (TextUtils.isEmpty(question) || question.length() < Question.MIN_LENGTH) {
+        if (TextUtils.isEmpty(question)) {
             view.onError(R.string.blank_question_error);
+            return;
+        } else if (question.length() < Question.MIN_LENGTH) {
+            view.onError(R.string.question_too_short_error);
             return;
         }
 
         RequestBody questionRb = RequestBody.create(MediaType.parse("text/plain"), question);
         RequestBody isPublicRb = RequestBody.create(MediaType.parse("text/plain"), Boolean.toString(isPublic));
         RequestBody timeLimitRb = RequestBody.create(MediaType.parse("text/plain"), Integer.toString(timeLimit));
-        File file = new File(imagePath);
-        RequestBody imageRb = RequestBody.create(MediaType.parse("image/*"), file);
+
+        RequestBody imageRb = null;
+        if (!TextUtils.isEmpty(imagePath)) {
+            File file = new File(imagePath);
+            imageRb = RequestBody.create(MediaType.parse("image/*"), file);
+        }
 
         Subscription createSubscription = questionService
                 .create(questionRb, isPublicRb, timeLimitRb, imageRb)

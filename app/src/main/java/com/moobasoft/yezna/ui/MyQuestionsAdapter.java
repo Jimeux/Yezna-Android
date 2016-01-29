@@ -36,7 +36,7 @@ public class MyQuestionsAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     public void loadQuestion(Question question) {
         questionList.add(0, question);
-        notifyDataSetChanged();
+        notifyItemInserted(0);
     }
 
     public void loadQuestions(List<Question> questions) {

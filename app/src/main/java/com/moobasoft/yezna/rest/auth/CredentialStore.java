@@ -47,6 +47,8 @@ public class CredentialStore {
         editor.putString(REFRESH_TOKEN, accessToken.getRefreshToken());
         editor.putInt(   EXPIRES_IN,    accessToken.getExpiresIn());
         editor.apply();
+
+        saveUser(accessToken.getUser());
     }
 
     public User loadUser() {

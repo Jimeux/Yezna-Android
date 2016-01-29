@@ -4,7 +4,6 @@ import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.auth.CredentialStore;
 import com.moobasoft.yezna.rest.errors.RegistrationError;
 import com.moobasoft.yezna.rest.models.AccessToken;
-import com.moobasoft.yezna.rest.models.User;
 import com.moobasoft.yezna.rest.requests.RegistrationRequest;
 import com.moobasoft.yezna.rest.services.UserService;
 import com.moobasoft.yezna.ui.RxSchedulers;
@@ -15,7 +14,6 @@ import java.io.IOException;
 import okhttp3.ResponseBody;
 import retrofit2.HttpException;
 import rx.Observable;
-import rx.Subscription;
 
 public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
 
@@ -26,7 +24,7 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
         void onRegistrationError(String username, String email, String password);
     }
 
-    private Observable<User> connectObservable;
+    private Observable<AccessToken> connectObservable;
 
     private final UserService userService;
     private final CredentialStore credentialStore;
@@ -47,41 +45,31 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
     }
 
     public void login(String username, String password) {
-        Observable<AccessToken> loginObservable = userService
-                .getAccessToken(username, password, "password");
-        createConnectObservable(loginObservable, username);
+        createConnectObservable(userService.getAccessToken(
+                username, password, "password"));
     }
 
     public void register(String email, String username, String password) {
-        Observable<AccessToken> registerObservable = userService
-                .register(new RegistrationRequest(email, username, password));
-        createConnectObservable(registerObservable, username);
+        createConnectObservable(userService.register(
+                new RegistrationRequest(email, username, password)));
     }
 
-    private void createConnectObservable(Observable<AccessToken> observable, String username) {
+    private void createConnectObservable(Observable<AccessToken> observable) {
         connectObservable = observable
-                .flatMap(token -> mapTokenToGetUser(username, token))
                 .compose(rxSchedulers.applySchedulers())
                 .cache();
         subscribeToConnectObservable();
     }
 
     private void subscribeToConnectObservable() {
-        Subscription loginSubscription = connectObservable.subscribe(
+        subscriptions.add(connectObservable.subscribe(
                 this::handleConnectOnNext,
                 this::handleConnectOnError,
-                this::handleConnectOnComplete);
-        subscriptions.add(loginSubscription);
+                this::handleConnectOnComplete));
     }
 
-    private Observable<User> mapTokenToGetUser(String username, AccessToken token) {
-        credentialStore.saveToken(token);
-        return userService.getUser(username)
-                .compose(rxSchedulers.applySchedulers());
-    }
-
-    private void handleConnectOnNext(User user) {
-        credentialStore.saveUser(user);
+    private void handleConnectOnNext(AccessToken accessToken) {
+        credentialStore.saveToken(accessToken);
         view.onLogin();
     }
 

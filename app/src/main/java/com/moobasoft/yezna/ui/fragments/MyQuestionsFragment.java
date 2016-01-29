@@ -151,6 +151,7 @@ public class MyQuestionsFragment extends RxFragment implements MyQuestionsPresen
 
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addOnScrollListener(scrollListener);
+        //recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(questionAdapter);
         scrollListener.setLayoutManager(layoutManager);
 

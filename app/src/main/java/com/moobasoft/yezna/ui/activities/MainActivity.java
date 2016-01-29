@@ -7,14 +7,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.GravityCompat;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.transition.Fade;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +31,6 @@ import com.moobasoft.yezna.events.auth.LoginPromptEvent;
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.rest.models.User;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
-import com.moobasoft.yezna.ui.fragments.AskQuestionFragment;
 import com.moobasoft.yezna.ui.fragments.MyQuestionsFragment;
 import com.moobasoft.yezna.ui.fragments.PublicQuestionsFragment;
 
@@ -47,7 +45,6 @@ import static com.moobasoft.yezna.ui.MyQuestionsAdapter.SummaryClickListener;
 
 public class MainActivity extends BaseActivity implements SummaryClickListener {
 
-    @Bind(R.id.app_bar) AppBarLayout appBarLayout;
     @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
     @Bind(R.id.navigation_view) NavigationView navigationView;
     @Bind(R.id.toolbar) Toolbar toolbar;
@@ -57,7 +54,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
     public static final String CURRENT_TAG_KEY = "current_tag_key";
 
-    enum Tag {PUBLIC_QUESTIONS, MY_QUESTIONS, ASK_QUESTION, PROFILE}
+    enum Tag {PUBLIC_QUESTIONS, MY_QUESTIONS, PROFILE}
 
     private Tag currentTag = Tag.PUBLIC_QUESTIONS;
     private FragmentManager fragmentManager;
@@ -137,8 +134,7 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                     fragment.setEnterTransition(new Fade(Fade.IN));
                     fragment.setReturnTransition(new Fade(Fade.IN));*/
                     transaction.add(container.getId(), fragment, tag.name());
-                }
-                else if (t.equals(tag) && fragment != null)
+                } else if (t.equals(tag) && fragment != null)
                     transaction.show(fragment);
                 else if (fragment != null)
                     transaction.hide(fragment);
@@ -155,8 +151,6 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 return new PublicQuestionsFragment();
             case MY_QUESTIONS:
                 return new MyQuestionsFragment();
-            case ASK_QUESTION:
-                return new AskQuestionFragment();
             default:
                 return null;
         }
@@ -164,43 +158,13 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
     private void initNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.action_public_questions:
-                    showFragment(Tag.PUBLIC_QUESTIONS);
-                    break;
-
-                case R.id.action_my_questions:
-                    showFragment(Tag.MY_QUESTIONS);
-                    break;
-
-                case R.id.action_ask_question:
-                    showFragment(Tag.ASK_QUESTION);
-                    break;
-
-                /** Auth-related items */
-                case R.id.action_login:
-                    Intent loginIntent = new Intent(this, ConnectActivity.class);
-                    loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    loginIntent.putExtra(ConnectActivity.REGISTER_MODE_KEY, false);
-                    startActivity(loginIntent);
-                    break;
-
-                case R.id.action_register:
-                    Intent registerIntent = new Intent(this, ConnectActivity.class);
-                    registerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    registerIntent.putExtra(ConnectActivity.REGISTER_MODE_KEY, true);
-                    startActivity(registerIntent);
-                    break;
-
-                case R.id.action_logout:
-                    credentialStore.delete();
-                    Snackbar.make(container, getString(R.string.logout_success), Snackbar.LENGTH_SHORT).show();
-                    setDrawerMenuItems();
-                    eventBus.send(new LogOutEvent());
-                    break;
-            }
             drawerLayout.closeDrawers();
             item.setChecked(false);
+            if (credentialStore.isLoggedIn() && !(item.getItemId() == R.id.action_ask_question))
+                handleMenuItemClick(item.getItemId());
+            else
+                // Wait for drawer to close for smoother animation
+                drawerLayout.postDelayed(() -> handleMenuItemClick(item.getItemId()), 220);
             return false; // False to avoid checking items
         });
 
@@ -265,31 +229,49 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        menu.findItem(R.id.action_ask_question).setVisible(
-                !currentTag.equals(Tag.ASK_QUESTION));
-        menu.findItem(R.id.action_public_questions).setVisible(
-                currentTag.equals(Tag.MY_QUESTIONS) || currentTag.equals(Tag.ASK_QUESTION));
-        menu.findItem(R.id.action_my_questions).setVisible(
-                currentTag.equals(Tag.PUBLIC_QUESTIONS) || currentTag.equals(Tag.ASK_QUESTION));
+        menu.findItem(R.id.action_ask_question).setVisible(true);
+        menu.findItem(R.id.action_public_questions)
+                .setVisible(!currentTag.equals(Tag.PUBLIC_QUESTIONS));
+        menu.findItem(R.id.action_my_questions)
+                .setVisible(!currentTag.equals(Tag.MY_QUESTIONS));
         return true;
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
-                return true;
+        return handleMenuItemClick(item.getItemId());
+    }
 
-            case R.id.action_ask_question:
-                showFragment(Tag.ASK_QUESTION);
+    private boolean handleMenuItemClick(int id) {
+        switch (id) {
+            case R.id.action_public_questions:
+                showFragment(Tag.PUBLIC_QUESTIONS);
                 break;
 
             case R.id.action_my_questions:
                 showFragment(Tag.MY_QUESTIONS);
                 break;
 
-            case R.id.action_public_questions:
-                showFragment(Tag.PUBLIC_QUESTIONS);
+            case R.id.action_ask_question:
+                Intent intent = new Intent(MainActivity.this, AskQuestionActivity.class);
+                ActivityOptionsCompat options = ActivityOptionsCompat.
+                        makeSceneTransitionAnimation(this);
+                ActivityCompat.startActivity(this, intent, options.toBundle());
+                break;
+
+            /** Auth-related items */
+            case R.id.action_login:
+                startConnectActivity(false);
+                break;
+
+            case R.id.action_register:
+                startConnectActivity(true);
+                break;
+
+            case R.id.action_logout:
+                credentialStore.delete();
+                Snackbar.make(container, getString(R.string.logout_success), Snackbar.LENGTH_SHORT).show();
+                setDrawerMenuItems();
+                eventBus.send(new LogOutEvent());
                 break;
         }
         return true;
@@ -300,13 +282,23 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 event.getMessage() : getString(R.string.error_unauthorized);
 
         Snackbar.make(toolbar, message, Snackbar.LENGTH_LONG)
+                .setCallback(new Snackbar.Callback() {
+                    @Override public void onDismissed(Snackbar snackbar, int event) {
+                        super.onDismissed(snackbar, event);
+                        if (event == Snackbar.Callback.DISMISS_EVENT_ACTION)
+                            startConnectActivity(false);
+                    }
+                })
                 .setActionTextColor(getResources().getColor(R.color.green400))
                 .setAction(getString(R.string.login), v -> {
-                    Intent intent = new Intent(MainActivity.this, ConnectActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ConnectActivity.REGISTER_MODE_KEY, false);
-                    startActivity(intent);
                 })
                 .show();
+    }
+
+    private void startConnectActivity(boolean register) {
+        Intent intent = new Intent(this, ConnectActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(ConnectActivity.REGISTER_MODE_KEY, register);
+        startActivity(intent);
     }
 }

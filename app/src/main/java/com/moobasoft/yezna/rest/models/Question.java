@@ -9,7 +9,7 @@ import java.util.Locale;
 
 public class Question implements Parcelable {
 
-    public static final int MIN_LENGTH = 10;
+    public static final int MIN_LENGTH = 5;
 
     private int id;
     private boolean isPublic;

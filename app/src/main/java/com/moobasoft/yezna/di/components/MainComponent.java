@@ -1,5 +1,6 @@
 package com.moobasoft.yezna.di.components;
 
+import com.moobasoft.yezna.ui.activities.AskQuestionActivity;
 import com.moobasoft.yezna.ui.activities.ConnectActivity;
 import com.moobasoft.yezna.ui.activities.MainActivity;
 import com.moobasoft.yezna.di.modules.MainModule;
@@ -22,9 +23,11 @@ import dagger.Component;
 public interface MainComponent {
 
     void inject(MainActivity mainIndexActivity);
+    void inject(AskQuestionActivity askQuestionActivity);
     void inject(ConnectActivity connectActivity);
     void inject(MyQuestionsFragment myQuestionsFragment);
     void inject(PublicQuestionsFragment publicQuestionsFragment);
+
     void inject(AskQuestionFragment askQuestionFragment);
 
 }

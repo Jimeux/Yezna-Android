@@ -71,7 +71,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
         mainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override public void onGlobalLayout() {
                 if (state == null)
-                    reveal();
+                    mainLayout.post(() -> reveal());
                 else
                     mainLayout.setVisibility(View.VISIBLE);
                 // for SDK >= 16
@@ -82,13 +82,28 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
 
     private void reveal() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            int cx = mainLayout.getWidth() / 2;
-            int cy = mainLayout.getHeight() / 2;
+            int cx = mainLayout.getWidth() ;
+            int cy = mainLayout.getHeight();
             float finalRadius = (float) Math.hypot(cx, cy);
 
             Animator anim = ViewAnimationUtils
                     .createCircularReveal(mainLayout, cx, cy, 0, finalRadius);
             mainLayout.setVisibility(View.VISIBLE);
+            anim.addListener(new Animator.AnimatorListener() {
+                @Override public void onAnimationStart(Animator animation) {
+                    mainLayout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                }
+
+                @Override public void onAnimationEnd(Animator animation) {
+                    mainLayout.setLayerType(View.LAYER_TYPE_NONE, null);
+                }
+
+                @Override public void onAnimationCancel(Animator animation) {
+                }
+
+                @Override public void onAnimationRepeat(Animator animation) {
+                }
+            });
             anim.start();
         }
 
@@ -133,12 +148,10 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     private void initialiseForm() {
         if (isRegisterMode) {
             emailLabel.setVisibility(VISIBLE);
-            emailEt.setVisibility(VISIBLE);
             primaryBtn.setText(getString(R.string.register));
             secondaryBtn.setText(getString(R.string.login_prompt));
         } else {
             emailLabel.setVisibility(GONE);
-            emailEt.setVisibility(GONE);
             primaryBtn.setText(getString(R.string.login));
             secondaryBtn.setText(getString(R.string.register_prompt));
         }

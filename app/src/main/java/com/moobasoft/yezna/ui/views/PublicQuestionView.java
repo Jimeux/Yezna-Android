@@ -15,14 +15,14 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public final class PublicQuestionView extends CardView {
-    @Bind(R.id.image)       ImageView imageIv;
-    @Bind(R.id.avatar)      ImageView avatarIv;
-    @Bind(R.id.username)    TextView  usernameTv;
-    @Bind(R.id.question)    TextView  questionTv;
-    @Bind(R.id.result)      TextView  resultTv;
-    @Bind(R.id.date)        TextView  dateTv;
-    @Bind(R.id.no_btn)      TextView noButton;
-    @Bind(R.id.yes_btn)     TextView yesButton;
+    @Bind(R.id.image) ImageView imageIv;
+    @Bind(R.id.avatar) ImageView avatarIv;
+    @Bind(R.id.username) TextView usernameTv;
+    @Bind(R.id.question) TextView questionTv;
+    @Bind(R.id.result) TextView resultTv;
+    @Bind(R.id.date) TextView dateTv;
+    @Bind(R.id.no_btn) TextView noButton;
+    @Bind(R.id.yes_btn) TextView yesButton;
 
     public interface QuestionClickListener {
         void onAnswerQuestion(Question question, View view, boolean yes);
@@ -49,6 +49,8 @@ public final class PublicQuestionView extends CardView {
         if (question.getImage() != null)
             Glide.with(getContext())
                     .load(question.getImage())
+                    .centerCrop()
+                    .dontAnimate()
                     .into(imageIv);
 
         questionTv.setText(question.getQuestion());
@@ -62,7 +64,7 @@ public final class PublicQuestionView extends CardView {
         int total = question.getYeses() + question.getNoes();
 
         String peeps = (total == 1) ? "person" : "people";
-        String all   = (total == 1) ? "" : "All ";
+        String all = (total == 1) ? "" : "All ";
 
         if (total == 0) {
             resultTv.setText(getResources().getString(R.string.no_answers));

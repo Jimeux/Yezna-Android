@@ -30,9 +30,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
 
     <style name="ListStatusView" parent="AppTheme">
@@ -63,6 +63,17 @@
         <item name="android:textColor">@color/grey700</item>
         <item name="android:textColorHint">@color/grey500</item>
         <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="AppTheme.Inverse" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/red100</item>
+        <item name="colorPrimaryDark">@color/red100</item>
+        <item name="colorAccent">@color/red100</item>
+
+        <item name="colorControlNormal">@color/red100</item>
+        <item name="colorControlActivated">@color/white</item>
+        <item name="colorControlHighlight">@color/white</item>
     </style>
 
 </resources>

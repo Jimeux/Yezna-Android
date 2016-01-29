@@ -5,13 +5,15 @@ public class AccessToken {
     private int expiresIn;
     private String accessToken;
     private String refreshToken;
+    private User user;
 
     public AccessToken() {}
 
-    public AccessToken(String accessToken, String refreshToken, int expiresIn) {
+    public AccessToken(String accessToken, String refreshToken, int expiresIn, User user) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.expiresIn = expiresIn;
+        this.user = user;
     }
 
     public int getExpiresIn() {
@@ -36,6 +38,14 @@ public class AccessToken {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override
