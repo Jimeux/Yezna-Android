@@ -10,14 +10,14 @@ import rx.subjects.Subject;
 
 public class EventBus {
 
-    private final Subject<Object, Object> bus = new SerializedSubject<>(PublishSubject.create());
+    private final Subject<Event, Event> bus = new SerializedSubject<>(PublishSubject.create());
 
-    public void send(Object o) {
+    public void send(Event event) {
         if (bus.hasObservers())
-            bus.onNext(o);
+            bus.onNext(event);
     }
 
-    public void sendDelayed(Object event, int delay) {
+    public void sendDelayed(Event event, int delay) {
         Observable.just(event)
                 .delay(delay, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())

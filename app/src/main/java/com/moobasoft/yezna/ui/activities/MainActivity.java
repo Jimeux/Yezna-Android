@@ -252,10 +252,14 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
                 break;
 
             case R.id.action_ask_question:
-                Intent intent = new Intent(MainActivity.this, AskQuestionActivity.class);
-                ActivityOptionsCompat options = ActivityOptionsCompat.
-                        makeSceneTransitionAnimation(this);
-                ActivityCompat.startActivity(this, intent, options.toBundle());
+                if (credentialStore.isLoggedIn()) {
+                    Intent intent = new Intent(MainActivity.this, AskQuestionActivity.class);
+                    ActivityOptionsCompat options = ActivityOptionsCompat.
+                            makeSceneTransitionAnimation(this);
+                    ActivityCompat.startActivity(this, intent, options.toBundle());
+                } else {
+                    promptForLogin(null);
+                }
                 break;
 
             /** Auth-related items */

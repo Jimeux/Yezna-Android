@@ -1,8 +1,9 @@
 package com.moobasoft.yezna.events.ask;
 
+import com.moobasoft.yezna.events.Event;
 import com.moobasoft.yezna.rest.models.Question;
 
-public class QuestionCreatedEvent {
+public class QuestionCreatedEvent implements Event {
 
     private final Question question;
 

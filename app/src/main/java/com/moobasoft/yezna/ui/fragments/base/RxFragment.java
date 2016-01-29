@@ -7,11 +7,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.moobasoft.yezna.App;
-import com.moobasoft.yezna.events.EventBus;
 import com.moobasoft.yezna.R;
-import com.moobasoft.yezna.di.components.DaggerMainComponent;
-import com.moobasoft.yezna.di.components.MainComponent;
+import com.moobasoft.yezna.di.components.DaggerFragmentComponent;
+import com.moobasoft.yezna.di.components.FragmentComponent;
+import com.moobasoft.yezna.di.modules.FragmentModule;
 import com.moobasoft.yezna.di.modules.MainModule;
+import com.moobasoft.yezna.events.EventBus;
 import com.moobasoft.yezna.events.auth.LoginPromptEvent;
 import com.moobasoft.yezna.rest.auth.CredentialStore;
 
@@ -69,9 +70,10 @@ public abstract class RxFragment extends Fragment {
         eventBus.send(new LoginPromptEvent(message));
     }
 
-    protected MainComponent getComponent() {
-        return DaggerMainComponent.builder()
+    protected FragmentComponent getComponent() {
+        return DaggerFragmentComponent.builder()
                 .mainModule(new MainModule())
+                .fragmentModule(new FragmentModule())
                 .appComponent(((App) getActivity().getApplication()).getAppComponent())
                 .build();
     }

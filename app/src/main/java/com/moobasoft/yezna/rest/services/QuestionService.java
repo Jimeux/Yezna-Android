@@ -22,7 +22,7 @@ public interface QuestionService {
 
     @GET("/api/questions/{id}")
     Observable<Question> show(@Header(CACHE_CONTROL_HEADER) String cacheControl,
-                                      @Path("id") int id);
+                              @Path("id") int id);
 
     @GET("/api/questions")
     Observable<List<Question>> index(@Header(CACHE_CONTROL_HEADER) String cacheControl,
@@ -30,10 +30,10 @@ public interface QuestionService {
 
     @Multipart
     @POST("/api/questions")
-    Observable<Question> create(@Part("question") RequestBody question,
-                                @Part("is_public") RequestBody isPublic,
-                                @Part("time_limit") RequestBody timeLimit,
-                                @Part("image\"; filename=\"filename\" ") RequestBody image);
+    Observable<Question> create(@Part("question[question]") RequestBody question,
+                                @Part("question[is_public]") RequestBody isPublic,
+                                @Part("question[time_limit]") RequestBody timeLimit,
+                                @Part("question[image]\"; filename=\"filename\" ") RequestBody image);
 
     @POST("/api/questions/{id}/answers")
     Observable<Question> answer(@Path("id") int questionId,

@@ -1,4 +1,6 @@
 package com.moobasoft.yezna.events.auth;
 
-public class LoginEvent {
+import com.moobasoft.yezna.events.Event;
+
+public class LoginEvent implements Event {
 }

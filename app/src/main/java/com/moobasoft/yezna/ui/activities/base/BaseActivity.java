@@ -4,10 +4,11 @@ import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 
 import com.moobasoft.yezna.App;
-import com.moobasoft.yezna.events.EventBus;
-import com.moobasoft.yezna.di.components.DaggerMainComponent;
-import com.moobasoft.yezna.di.components.MainComponent;
+import com.moobasoft.yezna.di.components.ActivityComponent;
+import com.moobasoft.yezna.di.components.DaggerActivityComponent;
+import com.moobasoft.yezna.di.modules.ActivityModule;
 import com.moobasoft.yezna.di.modules.MainModule;
+import com.moobasoft.yezna.events.EventBus;
 import com.moobasoft.yezna.rest.auth.CredentialStore;
 
 import javax.inject.Inject;
@@ -24,9 +25,10 @@ public class BaseActivity extends AppCompatActivity {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
-    protected MainComponent getComponent() {
-        return DaggerMainComponent.builder()
+    protected ActivityComponent getComponent() {
+        return DaggerActivityComponent.builder()
                 .mainModule(new MainModule())
+                .activityModule(new ActivityModule())
                 .appComponent(((App) getApplication()).getAppComponent())
                 .build();
     }

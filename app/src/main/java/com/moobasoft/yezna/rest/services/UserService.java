@@ -7,12 +7,16 @@ import com.moobasoft.yezna.rest.requests.RegistrationRequest;
 
 import java.util.List;
 
+import okhttp3.RequestBody;
 import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
@@ -42,9 +46,12 @@ public interface UserService {
     @GET("/api/users/questions")
     Observable<List<Question>> getQuestions(@Query("page") int page);
 
-    /*@Multipart
-    @POST("/api/users/avatar")
-    Observable<User> uploadAvatar(@Part("avatar") TypedFile avatar);*/
+    @Multipart
+    @PATCH("/api/users/")
+    Observable<User> updateProfile(@Part("user[username]") String username,
+                                   @Part("user[email]") String email,
+                                   @Part("user[password]") String password,
+                                   @Part("question[image]\"; filename=\"filename\" ") RequestBody avatar);
 
     @FormUrlEncoded
     @POST("/api/users/avatar")
