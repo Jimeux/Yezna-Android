@@ -33,32 +33,12 @@ public final class MyQuestionView extends CardView {
     public void bindTo(Question question, SummaryClickListener listener) {
         if (question.getImage() != null)
             Glide.with(getContext())
-                    .load(question.getImage())
+                    .load(question.getThumb())
                     .into(imageIv);
 
         questionTv.setText(question.getQuestion());
         dateTv.setText(question.getCreatedAt());
-        setMessage(question);
+        resultTv.setText(question.getResult());
     }
 
-    private void setMessage(Question question) {
-        int total = question.getYeses() + question.getNoes();
-
-        String peeps = (total == 1) ? "person" : "people";
-        String all   = (total == 1) ? "" : "All ";
-
-        if (total == 0) {
-            resultTv.setText(getResources().getString(R.string.no_answers));
-        } else if (total == question.getYeses()) {
-            resultTv.setText(all + total + " " + peeps + " said yes");
-        } else if (total == question.getNoes()) {
-            resultTv.setText(all + total + " " + peeps + " said no");
-        } else if (question.getYeses() >= question.getNoes()) {
-            int percentage = (int) ((float) question.getYeses() / total * 100);
-            resultTv.setText(percentage + "% of " + total + " " + peeps + " said yes");
-        } else {
-            int percentage = (int) ((float) question.getNoes() / total * 100);
-            resultTv.setText(percentage + "% of " + total + " " + peeps + " said no");
-        }
-    }
 }

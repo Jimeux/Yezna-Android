@@ -1,6 +1,7 @@
 package com.moobasoft.yezna.ui.fragments.base;
 
 import android.app.Fragment;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.OnClick;
+import icepick.Icepick;
 import rx.subscriptions.CompositeSubscription;
 
 import static android.view.View.VISIBLE;
@@ -46,6 +48,7 @@ public abstract class RxFragment extends Fragment {
 
     @Override public void onStart() {
         super.onStart();
+        eventSubscriptions = new CompositeSubscription();
         subscribeToEvents();
     }
 
@@ -53,6 +56,16 @@ public abstract class RxFragment extends Fragment {
         super.onStop();
         if (eventSubscriptions != null)
             eventSubscriptions.clear();
+    }
+
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Icepick.restoreInstanceState(this, savedInstanceState);
+    }
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Icepick.saveInstanceState(this, outState);
     }
 
     public void onError(int messageId) {

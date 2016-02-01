@@ -48,10 +48,10 @@ public interface UserService {
 
     @Multipart
     @PATCH("/api/users/")
-    Observable<User> updateProfile(@Part("user[username]") RequestBody username,
-                                   @Part("user[email]") RequestBody email,
+    Observable<User> updateProfile(@Part("user[email]") RequestBody email,
                                    @Part("user[password]") RequestBody password,
-                                   @Part("user[avatar]\"; filename=\"filename\" ") RequestBody avatar);
+                                   @Part("user[avatar]") RequestBody avatarUrl,
+                                   @Part("user[avatar]\"; filename=\"filename\" ") RequestBody avatarFile);
 
     @FormUrlEncoded
     @POST("/api/users/avatar")

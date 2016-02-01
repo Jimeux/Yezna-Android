@@ -23,11 +23,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.moobasoft.yezna.R;
-import com.moobasoft.yezna.events.EventBus;
 import com.moobasoft.yezna.events.ask.QuestionCreatedEvent;
 import com.moobasoft.yezna.events.auth.LogOutEvent;
 import com.moobasoft.yezna.events.auth.LoginEvent;
-import com.moobasoft.yezna.events.auth.LoginPromptEvent;
 import com.moobasoft.yezna.rest.models.Question;
 import com.moobasoft.yezna.rest.models.User;
 import com.moobasoft.yezna.ui.activities.base.BaseActivity;
@@ -35,12 +33,9 @@ import com.moobasoft.yezna.ui.fragments.MyQuestionsFragment;
 import com.moobasoft.yezna.ui.fragments.ProfileFragment;
 import com.moobasoft.yezna.ui.fragments.PublicQuestionsFragment;
 
-import javax.inject.Inject;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
+import icepick.Icicle;
 
 import static com.moobasoft.yezna.ui.MyQuestionsAdapter.SummaryClickListener;
 
@@ -51,17 +46,12 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.container) ViewGroup container;
 
-    @Inject EventBus eventBus;
-
-    public static final String CURRENT_TAG_KEY = "current_tag_key";
+    @Icicle Tag currentTag = Tag.PUBLIC_QUESTIONS;
 
     enum Tag {PUBLIC_QUESTIONS, MY_QUESTIONS, PROFILE}
-
-    private Tag currentTag = Tag.PUBLIC_QUESTIONS;
     private FragmentManager fragmentManager;
-    private CompositeSubscription eventSubscriptions;
 
-    @Override protected void onCreate(@Nullable Bundle state) {
+    @Override public void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
@@ -72,52 +62,23 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         initNavigationDrawer();
     }
 
-    @Override protected void onSaveInstanceState(Bundle state) {
-        super.onSaveInstanceState(state);
-        state.putSerializable(CURRENT_TAG_KEY, currentTag);
-    }
-
     @Override protected void onPostCreate(@Nullable Bundle state) {
         super.onPostCreate(state);
-        if (state != null) {
-            Tag savedTag = (Tag) state.getSerializable(CURRENT_TAG_KEY);
-            if (savedTag != null) currentTag = savedTag;
-        }
         showFragment(currentTag);
     }
 
-    @Override protected void onStart() {
-        super.onStart();
-        subscribeToEvents();
-    }
-
-    @Override protected void onStop() {
-        super.onStop();
-        eventSubscriptions.clear();
-    }
-
-    private void subscribeToEvents() {
-        Subscription loginEvent = eventBus
-                .listenFor(LoginEvent.class)
+    @Override
+    public void subscribeToEvents() {
+        super.subscribeToEvents();
+        eventSubscriptions.add(eventBus.listenFor(LoginEvent.class)
                 .subscribe(event -> {
                     setDrawerMenuItems();
                     loadUserDetails();
-                });
-
-        Subscription loginPromptEvent = eventBus
-                .listenFor(LoginPromptEvent.class)
-                .subscribe(this::promptForLogin);
-
-        Subscription logoutEvent = eventBus
-                .listenFor(LogOutEvent.class)
-                .subscribe(this::handleLogOut);
-
-        Subscription createdEvent = eventBus
-                .listenFor(QuestionCreatedEvent.class)
-                .subscribe(questionCreatedEvent -> showFragment(Tag.MY_QUESTIONS));
-
-        eventSubscriptions = new CompositeSubscription(
-                loginEvent, loginPromptEvent, logoutEvent, createdEvent);
+                }));
+        eventSubscriptions.add(eventBus.listenFor(LogOutEvent.class)
+                .subscribe(this::handleLogOut));
+        eventSubscriptions.add(eventBus.listenFor(QuestionCreatedEvent.class)
+                .subscribe(questionCreatedEvent -> showFragment(Tag.MY_QUESTIONS)));
     }
 
     private void showFragment(Tag tag) {
@@ -261,8 +222,8 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
             case R.id.action_ask_question:
                 if (credentialStore.isLoggedIn()) {
                     Intent intent = new Intent(MainActivity.this, AskQuestionActivity.class);
-                    ActivityOptionsCompat options = ActivityOptionsCompat.
-                            makeSceneTransitionAnimation(this);
+                    ActivityOptionsCompat options = ActivityOptionsCompat
+                            .makeSceneTransitionAnimation(this);
                     ActivityCompat.startActivity(this, intent, options.toBundle());
                 } else {
                     promptForLogin(null);
@@ -288,28 +249,4 @@ public class MainActivity extends BaseActivity implements SummaryClickListener {
         return true;
     }
 
-    public void promptForLogin(LoginPromptEvent event) {
-        String message = (event != null && event.getMessage() != null) ?
-                event.getMessage() : getString(R.string.error_unauthorized);
-
-        Snackbar.make(toolbar, message, Snackbar.LENGTH_LONG)
-                .setCallback(new Snackbar.Callback() {
-                    @Override public void onDismissed(Snackbar snackbar, int event) {
-                        super.onDismissed(snackbar, event);
-                        if (event == Snackbar.Callback.DISMISS_EVENT_ACTION)
-                            startConnectActivity(false);
-                    }
-                })
-                .setActionTextColor(getResources().getColor(R.color.green400))
-                .setAction(getString(R.string.login), v -> {
-                })
-                .show();
-    }
-
-    private void startConnectActivity(boolean register) {
-        Intent intent = new Intent(this, ConnectActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(ConnectActivity.REGISTER_MODE_KEY, register);
-        startActivity(intent);
-    }
 }

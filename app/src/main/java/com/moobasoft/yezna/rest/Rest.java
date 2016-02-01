@@ -4,7 +4,8 @@ public interface Rest {
 
     int MAX_STALE = 60 * 60 * 24 * 28;
 
-    String PRODUCTION_API_URL = "http://192.168.11.5:3000/";
+    //String PRODUCTION_API_URL = "http://192.168.11.5:3000/";
+    String PRODUCTION_API_URL = "http://192.241.255.126/";
 
     String ACCEPT_HEADER = "Accept";
     String ACCEPT_JSON = "application/javascript, application/json";

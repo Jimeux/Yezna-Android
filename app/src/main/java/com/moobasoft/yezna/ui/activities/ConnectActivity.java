@@ -27,20 +27,20 @@ import javax.inject.Inject;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import icepick.Icicle;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 public class ConnectActivity extends BaseActivity implements ConnectPresenter.View {
 
-    public static final String PROCESSING_KEY = "processing_key";
     public static final String REGISTER_MODE_KEY = "register_mode_key";
     public static final String RETAINER_TAG = "connect_retainer_tag";
 
     /**
      * Track if a network request is currently in progress
      */
-    private boolean processing;
+    @Icicle boolean processing;
     /**
      * Track if the register or login form should be displayed
      */
@@ -59,7 +59,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
     @Bind({R.id.username_et, R.id.email_et, R.id.password_et})
     List<EditText> inputFields;
 
-    @Override protected void onCreate(final Bundle state) {
+    @Override public void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_connect);
         ButterKnife.bind(this);
@@ -78,6 +78,7 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
                 mainLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
+        setProcessing(processing);
     }
 
     private void reveal() {
@@ -111,17 +112,8 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
             mainLayout.setVisibility(View.VISIBLE);
     }
 
-    @Override protected void onRestoreInstanceState(Bundle state) {
-        super.onRestoreInstanceState(state);
-        if (state != null) {
-            processing = state.getBoolean(PROCESSING_KEY);
-            setProcessing(processing);
-        }
-    }
-
-    @Override protected void onSaveInstanceState(Bundle state) {
+    @Override public void onSaveInstanceState(@Nullable Bundle state) {
         super.onSaveInstanceState(state);
-        state.putBoolean(PROCESSING_KEY, processing);
         getIntent().putExtra(REGISTER_MODE_KEY, isRegisterMode);
     }
 
@@ -194,9 +186,6 @@ public class ConnectActivity extends BaseActivity implements ConnectPresenter.Vi
                 break;
             }
         }
-    }
-
-    @Override public void promptForLogin() {
     }
 
     private void setProcessing(boolean processing) {

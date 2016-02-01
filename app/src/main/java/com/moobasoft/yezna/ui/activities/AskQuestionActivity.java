@@ -3,6 +3,7 @@ package com.moobasoft.yezna.ui.activities;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
@@ -29,6 +30,7 @@ import javax.inject.Inject;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import icepick.Icicle;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -44,11 +46,11 @@ public class AskQuestionActivity extends BaseActivity implements AskQuestionPres
     @Bind(R.id.time_limit) Spinner timeLimitSpinner;
     @Bind(R.id.processing_view) ViewGroup processingView;
 
-    private String imagePath;
-    private String imageUrl;
+    @Icicle String imagePath;
+    @Icicle String imageUrl;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ask_question);
         ButterKnife.bind(this);
@@ -139,11 +141,11 @@ public class AskQuestionActivity extends BaseActivity implements AskQuestionPres
         presenter.askQuestion(questionString, isPublic, timeLimit, imagePath);
     }
 
-    @OnClick(R.id.image_btn)
+    @OnClick(R.id.select_image_btn)
     public void imageButtonClicked() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, ImageUtil.SELECT_PICTURE);
+        startActivityForResult(galleryIntent, ImageUtil.REQUEST_SELECT_IMAGE);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -25,8 +25,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
+import icepick.Icicle;
 
 import static android.view.View.VISIBLE;
 import static com.moobasoft.yezna.ui.views.PublicQuestionView.QuestionClickListener;
@@ -36,10 +35,9 @@ public class PublicQuestionsFragment extends RxFragment
 
     @Inject PublicQuestionPresenter presenter;
 
-    public static final String QUESTIONS_KEY = "questions_key";
     public static final int PER_PAGE = 6;
 
-    private ArrayList<Question> questions;
+    @Icicle ArrayList<Question> questions;
     /**
      * Manages question views as an animated deck of cards.
      */
@@ -56,11 +54,7 @@ public class PublicQuestionsFragment extends RxFragment
         super.onCreate(state);
         getComponent().inject(this);
         presenter.bindView(this);
-
-        if (state != null)
-            questions = state.getParcelableArrayList(QUESTIONS_KEY);
-        if (questions == null)
-            questions = new ArrayList<>();
+        if (questions == null) questions = new ArrayList<>();
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
@@ -82,11 +76,6 @@ public class PublicQuestionsFragment extends RxFragment
             activateContentView();
     }
 
-    @Override public void onSaveInstanceState(Bundle state) {
-        super.onSaveInstanceState(state);
-        state.putParcelableArrayList(QUESTIONS_KEY, questions);
-    }
-
     @Override public void onDestroyView() {
         presenter.releaseView();
         ButterKnife.unbind(this);
@@ -94,16 +83,10 @@ public class PublicQuestionsFragment extends RxFragment
     }
 
     @Override protected void subscribeToEvents() {
-        Subscription loginEventSubscription =
-                eventBus.listenFor(LoginEvent.class)
-                        .subscribe(event -> onRefresh()); //TODO: Error handling?
-
-        Subscription logOutEventSubscription =
-                eventBus.listenFor(LogOutEvent.class)
-                        .subscribe(event -> onRefresh());
-
-        eventSubscriptions = new CompositeSubscription(
-                loginEventSubscription, logOutEventSubscription);
+        eventSubscriptions.add(eventBus.listenFor(LoginEvent.class)
+                .subscribe(event -> onRefresh()));
+        eventSubscriptions.add(eventBus.listenFor(LogOutEvent.class)
+                .subscribe(event -> onRefresh()));
     }
 
     private void loadPosts(boolean refresh) {

@@ -15,7 +15,9 @@ public class Question implements Parcelable {
     private boolean isPublic;
     private String question;
     private String image;
+    private String thumb;
     private String url;
+    private String result;
     private int noes;
     private int yeses;
     private Date createdAt;
@@ -24,13 +26,15 @@ public class Question implements Parcelable {
 
     public Question() {}
 
-    public Question(int id, boolean isPublic, String question, String image, String url, int noes,
-                    int yeses, Date createdAt, int timeLimit, User user) {
+    public Question(int id, boolean isPublic, String question, String image, String thumb, String url,
+                    String result, int noes, int yeses, Date createdAt, int timeLimit, User user) {
         this.id        = id;
         this.isPublic  = isPublic;
         this.question  = question;
         this.image     = image;
+        this.thumb     = thumb;
         this.url       = url;
+        this.result    = result;
         this.noes      = noes;
         this.yeses     = yeses;
         this.createdAt = createdAt;
@@ -75,12 +79,28 @@ public class Question implements Parcelable {
         this.image = image;
     }
 
+    public String getThumb() {
+        return thumb;
+    }
+
+    public void setThumb(String thumb) {
+        this.thumb = thumb;
+    }
+
     public String getUrl() {
         return url;
     }
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
     }
 
     public int getNoes() {
@@ -135,7 +155,9 @@ public class Question implements Parcelable {
         out.writeByte((byte) (isPublic ? 1 : 0));
         out.writeString(question);
         out.writeString(image);
+        out.writeString(thumb);
         out.writeString(url);
+        out.writeString(result);
         out.writeInt(noes);
         out.writeInt(yeses);
         out.writeLong(createdAt.getTime());
@@ -157,10 +179,13 @@ public class Question implements Parcelable {
         isPublic  = in.readByte() == 1;
         question  = in.readString();
         image     = in.readString();
+        thumb     = in.readString();
         url       = in.readString();
+        result    = in.readString();
         noes      = in.readInt();
         yeses     = in.readInt();
         createdAt = new Date(in.readLong());
         user      = in.readParcelable(User.class.getClassLoader());
     }
+
 }

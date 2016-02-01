@@ -25,12 +25,27 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"/>
 
+        <EditText
+            android:id="@+id/profile_email"
+            android:inputType="textEmailAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"/>
+
         <Button
-            android:id="@+id/image_btn"
+            android:id="@+id/select_image_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:text="Select Image"/>
+
+        <Button
+            android:id="@+id/capture_image_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Take a photo"/>
+
         <Button
             android:id="@+id/update_profile_btn"
             android:layout_width="wrap_content"

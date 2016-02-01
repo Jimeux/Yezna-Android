@@ -27,14 +27,12 @@ import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
+import icepick.Icicle;
 
 import static android.view.View.VISIBLE;
 
 public class MyQuestionsFragment extends RxFragment implements MyQuestionsPresenter.View, OnRefreshListener {
 
-    public static final String PAGE_KEY = "page_key";
     public static final String QUESTIONS_KEY = "summaries_key";
     public static final String SCROLL_KEY = "scroll_key";
 
@@ -51,7 +49,7 @@ public class MyQuestionsFragment extends RxFragment implements MyQuestionsPresen
     /**
      * The current page of post data. Used as a query param.
      */
-    private int currentPage = 1;
+    @Icicle int currentPage = 1;
 
     @Inject MyQuestionsPresenter presenter;
 
@@ -79,7 +77,6 @@ public class MyQuestionsFragment extends RxFragment implements MyQuestionsPresen
 
     private void restoreState(@Nullable Bundle state) {
         if (state != null) {
-            currentPage = state.getInt(PAGE_KEY);
             List<Question> questions = state.getParcelableArrayList(QUESTIONS_KEY);
             scrollListener.restoreState(state.getParcelable(SCROLL_KEY));
             if (scrollListener.isFinished())
@@ -112,7 +109,6 @@ public class MyQuestionsFragment extends RxFragment implements MyQuestionsPresen
 
     @Override public void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-        state.putInt(PAGE_KEY, currentPage);
         state.putParcelableArrayList(QUESTIONS_KEY, questionAdapter.getQuestionsList());
         state.putParcelable(SCROLL_KEY, scrollListener.getOutState());
     }
@@ -124,24 +120,19 @@ public class MyQuestionsFragment extends RxFragment implements MyQuestionsPresen
     }
 
     @Override protected void subscribeToEvents() {
-        Subscription loginEvent =
-                eventBus.listenFor(LoginEvent.class)
-                        .subscribe(event -> loadQuestions(true));
-
-        Subscription logOutEvent =
-                eventBus.listenFor(LogOutEvent.class)
-                        .subscribe(event -> {
-                            activateEmptyView(getString(R.string.unauthorized_my_questions));
-                            reset();
-                        });
-
-        Subscription createdEvent = eventBus
+        eventSubscriptions.add(eventBus
+                .listenFor(LoginEvent.class)
+                .subscribe(event -> loadQuestions(true)));
+        eventSubscriptions.add(eventBus
+                .listenFor(LogOutEvent.class)
+                .subscribe(event -> {
+                    activateEmptyView(getString(R.string.unauthorized_my_questions));
+                    reset();
+                }));
+        eventSubscriptions.add(eventBus
                 .listenFor(QuestionCreatedEvent.class)
                 .map(QuestionCreatedEvent::getQuestion)
-                .subscribe(questionAdapter::loadQuestion);
-
-        eventSubscriptions = new CompositeSubscription(
-                loginEvent, logOutEvent, createdEvent);
+                .subscribe(questionAdapter::loadQuestion));
     }
 
     private void initialiseRecyclerView() {

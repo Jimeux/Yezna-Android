@@ -1,5 +1,7 @@
 package com.moobasoft.yezna.ui.presenters;
 
+import android.util.Log;
+
 import com.moobasoft.yezna.R;
 import com.moobasoft.yezna.rest.auth.CredentialStore;
 import com.moobasoft.yezna.rest.errors.RegistrationError;
@@ -19,8 +21,10 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
 
     public interface View extends RxPresenter.RxView {
         void onLogin();
+
         //void onRegister(String username);
         void onLoginError();
+
         void onRegistrationError(String username, String email, String password);
     }
 
@@ -65,7 +69,7 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
         subscriptions.add(connectObservable.subscribe(
                 this::handleConnectOnNext,
                 this::handleConnectOnError,
-                this::handleConnectOnComplete));
+                this::clearConnectObservable));
     }
 
     private void handleConnectOnNext(AccessToken accessToken) {
@@ -80,9 +84,10 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
             view.onLoginError();
         else
             handleThrowable(throwable);
+        clearConnectObservable();
     }
 
-    private void handleConnectOnComplete() {
+    private void clearConnectObservable() {
         connectObservable = null;
     }
 
@@ -98,6 +103,7 @@ public class ConnectPresenter extends RxPresenter<ConnectPresenter.View> {
                     error.getPassword());
         } catch (IOException e) {
             view.onError(R.string.error_default);
+            Log.e("TAGGART", "Error in handleValidationErrors: ", e);
         }
     }
 }

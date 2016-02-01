@@ -1,11 +1,17 @@
 package com.moobasoft.yezna.ui.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,13 +25,16 @@ import com.moobasoft.yezna.ui.fragments.base.RxFragment;
 import com.moobasoft.yezna.ui.presenters.ProfilePresenter;
 import com.moobasoft.yezna.util.ImageUtil;
 
+import java.io.ByteArrayOutputStream;
+
 import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
+import icepick.Icicle;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 
 public class ProfileFragment extends RxFragment implements ProfilePresenter.View {
 
@@ -34,6 +43,11 @@ public class ProfileFragment extends RxFragment implements ProfilePresenter.View
 
     @Bind(R.id.profile_avatar) ImageView avatar;
     @Bind(R.id.profile_username) TextView username;
+    @Bind(R.id.profile_email) EditText email;
+
+    @Icicle String imagePath;
+    @Icicle String imageUrl;
+    private RequestBody imageRb;
 
     public ProfileFragment() {
     }
@@ -49,10 +63,10 @@ public class ProfileFragment extends RxFragment implements ProfilePresenter.View
         getComponent().inject(this);
         presenter.bindView(this);
         User user = credentialStore.loadUser();
-        if (user.getAvatar() != null)
+        if (!TextUtils.isEmpty(user.getAvatar()))
             Glide.with(this).load(user.getAvatar()).into(avatar);
         username.setText(user.getUsername());
-
+        email.setText(user.getEmail());
     }
 
     @Override public void onDestroyView() {
@@ -62,13 +76,9 @@ public class ProfileFragment extends RxFragment implements ProfilePresenter.View
     }
 
     @Override protected void subscribeToEvents() {
-        Subscription logOutEvent =
-                eventBus.listenFor(LogOutEvent.class)
-                        .subscribe(event -> {
-                            activateEmptyView(getString(R.string.unauthorized_my_questions));
-                            //TODO: Redirect
-                        });
-        eventSubscriptions = new CompositeSubscription(logOutEvent);
+        eventSubscriptions.add(eventBus.listenFor(LogOutEvent.class)
+                .subscribe(event -> {
+                }));
     }
 
     @Override public void onError(int messageId) {
@@ -81,6 +91,15 @@ public class ProfileFragment extends RxFragment implements ProfilePresenter.View
     @Override public void onProfileUpdated(User user) {
         credentialStore.saveUser(user);
         eventBus.send(new LoginEvent());
+        imageRb = null;
+        imagePath = null;
+        imageUrl = null;
+        email.setText(user.getEmail());
+
+        if (!TextUtils.isEmpty(user.getAvatar()))
+            Glide.with(getActivity()).load(user.getAvatar()).into(avatar);
+
+        Snackbar.make(avatar, getString(R.string.profile_update), Snackbar.LENGTH_SHORT).show();
     }
 
     @Override public void onProfileError(String error) {
@@ -89,27 +108,48 @@ public class ProfileFragment extends RxFragment implements ProfilePresenter.View
 
     @OnClick(R.id.update_profile_btn)
     public void clickUpdateBtn() {
-        presenter.updateProfile("jim", null, null, imagePath);
+        presenter.updateProfile(email.getText().toString(), null, imagePath, imageUrl, imageRb);
     }
 
+    @OnClick(R.id.capture_image_btn)
+    public void cameraButtonClicked() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, ImageUtil.REQUEST_CAPTURE_IMAGE);
+        }
+    }
 
-    @OnClick(R.id.image_btn)
+    @OnClick(R.id.select_image_btn)
     public void imageButtonClicked() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, ImageUtil.SELECT_PICTURE);
+        startActivityForResult(galleryIntent, ImageUtil.REQUEST_SELECT_IMAGE);
     }
-
-    private String imagePath;
-    private String imageUrl;
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        ImageUtil.ImageResult result = ImageUtil
-                .onImageSelected(getActivity().getApplicationContext(),
-                        requestCode, resultCode, data, getActivity().findViewById(R.id.toolbar));
 
-        imagePath = result.imagePath;
-        imageUrl = result.imageUrl;
+        if (requestCode == ImageUtil.REQUEST_CAPTURE_IMAGE && resultCode == Activity.RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap bitmap = (Bitmap) extras.get("data");
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            if (bitmap != null) {
+                //TODO: Resize
+                bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream);
+                imageRb = RequestBody.create(MediaType.parse("image/png"), stream.toByteArray());
+            }
+        }
+
+        else if (requestCode == ImageUtil.REQUEST_SELECT_IMAGE && resultCode == Activity.RESULT_OK) {
+
+            ImageUtil.ImageResult result = ImageUtil
+                    .onImageSelected(getActivity().getApplicationContext(),
+                            requestCode, resultCode, data, getActivity().findViewById(R.id.toolbar));
+
+            if (result != null) {
+                imagePath = result.imagePath;
+                imageUrl = result.imageUrl;
+            }
+        }
     }
 }

@@ -28,11 +28,8 @@ public class ProfilePresenter extends RxPresenter<ProfilePresenter.View> {
         this.userService = userService;
     }
 
-    public void updateProfile(String username, String email, String password, String imagePath) {
-
-        RequestBody usernameRb = null;
-        if (!TextUtils.isEmpty(username))
-            usernameRb = RequestBody.create(MediaType.parse("text/plain"), username);
+    public void updateProfile(String email, String password,
+                              String imagePath, String imageUrl, RequestBody imageRb) {
 
         RequestBody emailRb = null;
         if (!TextUtils.isEmpty(email))
@@ -42,14 +39,18 @@ public class ProfilePresenter extends RxPresenter<ProfilePresenter.View> {
         if (!TextUtils.isEmpty(password))
             passwordRb = RequestBody.create(MediaType.parse("text/plain"), password);
 
-        RequestBody avatarRb = null;
-        if (!TextUtils.isEmpty(imagePath)) {
-            File file = new File(imagePath); //TODO: Check file
-            avatarRb = RequestBody.create(MediaType.parse("image/*"), file);
-        }
+        RequestBody avatarFileRb = null;
+        if (imageRb != null)
+            avatarFileRb = imageRb;
+        else if (!TextUtils.isEmpty(imagePath))
+            avatarFileRb = RequestBody.create(MediaType.parse("image/*"), new File(imagePath));
+
+        RequestBody avatarUrlRb = null;
+        if (!TextUtils.isEmpty(imageUrl))
+            avatarUrlRb = RequestBody.create(MediaType.parse("text/plain"), imageUrl);
 
         Subscription createSubscription = userService
-                .updateProfile(usernameRb, emailRb, passwordRb, avatarRb)
+                .updateProfile(emailRb, passwordRb, avatarUrlRb, avatarFileRb)
                 .compose(rxSchedulers.applySchedulers())
                 .subscribe(view::onProfileUpdated, this::handleError);
 
