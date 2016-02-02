@@ -17,6 +17,7 @@ public class CredentialStore {
 
     private static final String USER_ID       = "user_id";
     private static final String USERNAME      = "username";
+    private static final String EMAIL         = "email";
     private static final String AVATAR        = "avatar";
 
     public CredentialStore(SharedPreferences prefs) {
@@ -55,6 +56,7 @@ public class CredentialStore {
         User user = new User();
         user.setId(prefs.getInt(USER_ID, -1));
         user.setUsername(prefs.getString(USERNAME, null));
+        user.setEmail(prefs.getString(EMAIL, null));
         user.setAvatar(prefs.getString(AVATAR, null));
 
         return (user.getId() == -1) ? null : user;
@@ -65,6 +67,7 @@ public class CredentialStore {
 
         editor.putInt(   USER_ID,  user.getId());
         editor.putString(USERNAME, user.getUsername());
+        editor.putString(EMAIL,    user.getEmail());
         editor.putString(AVATAR,   user.getAvatar());
         editor.apply();
     }
@@ -84,6 +87,7 @@ public class CredentialStore {
 
         editor.remove(USER_ID);
         editor.remove(USERNAME);
+        editor.remove(EMAIL);
         editor.remove(AVATAR);
 
         editor.apply();

@@ -68,5 +68,6 @@
     <string name="title_activity_ask_question">AskQuestionActivity</string>
     <string name="question_too_short_error">Question should be at least %1$s characters</string>
     <string name="profile_update">Profile updated!</string>
+    <string name="update_profile">Update Profile</string>
 
 </resources>

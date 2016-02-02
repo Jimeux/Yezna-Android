@@ -12,19 +12,19 @@ public class EventBus {
 
     private final Subject<Event, Event> bus = new SerializedSubject<>(PublishSubject.create());
 
-    public void send(Event event) {
+    public <E extends Event> void send(E event) {
         if (bus.hasObservers())
             bus.onNext(event);
     }
 
-    public void sendDelayed(Event event, int delay) {
+    public <E extends Event> void sendDelayed(E event, int delay) {
         Observable.just(event)
                 .delay(delay, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::send);
     }
 
-    public <E> Observable<E> listenFor(Class<E> eventClass) {
+    public <E extends Event> Observable<E> listenFor(Class<E> eventClass) {
         return bus.ofType(eventClass);
     }
 }

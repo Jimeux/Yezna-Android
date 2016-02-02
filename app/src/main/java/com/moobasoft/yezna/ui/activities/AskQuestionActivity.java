@@ -153,8 +153,10 @@ public class AskQuestionActivity extends BaseActivity implements AskQuestionPres
         ImageUtil.ImageResult result = ImageUtil
                 .onImageSelected(this.getApplicationContext(), requestCode, resultCode, data, toolbar);
 
-        imagePath = result.imagePath;
-        imageUrl = result.imageUrl;
+        if (result != null) {
+            imagePath = result.avatarPath;
+            imageUrl = result.avatarUrl;
+        }
     }
 
 }

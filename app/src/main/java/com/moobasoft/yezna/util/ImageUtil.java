@@ -4,14 +4,22 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.moobasoft.yezna.R;
+
+import java.io.ByteArrayOutputStream;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 
 public class ImageUtil {
 
@@ -22,11 +30,11 @@ public class ImageUtil {
     public static final int REQUEST_CAPTURE_IMAGE = 532;
 
     public static class ImageResult {
-        public String imageUrl;
-        public String imagePath;
+        public String avatarUrl;
+        public String avatarPath;
     }
 
-    /*public static void scaleImage(String imagePath) {
+    /*public static void scaleImage(String avatarPath) {
         // Get the dimensions of the View
         int targetW = mImageView.getWidth();
         int targetH = mImageView.getHeight();
@@ -34,7 +42,7 @@ public class ImageUtil {
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, bmOptions);
+        BitmapFactory.decodeFile(avatarPath, bmOptions);
         int photoW = bmOptions.outWidth;
         int photoH = bmOptions.outHeight;
 
@@ -46,7 +54,7 @@ public class ImageUtil {
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
+        Bitmap bitmap = BitmapFactory.decodeFile(avatarPath, bmOptions);
         mImageView.setImageBitmap(bitmap);
     }*/
 
@@ -60,9 +68,9 @@ public class ImageUtil {
                     ImageResult result = new ImageResult();
 
                     if (picturePath.contains("http"))
-                        result.imageUrl = picturePath;
+                        result.avatarUrl = picturePath;
                     else
-                        result.imagePath = picturePath;
+                        result.avatarPath = picturePath;
 
                     return result;
                 }
@@ -88,6 +96,20 @@ public class ImageUtil {
             String picturePath = cursor.getString(columnIndex); // returns null
             cursor.close();
             return picturePath;
+        }
+        return null;
+    }
+
+    @Nullable
+    public static RequestBody getBitmapFromData(Intent data, ImageView avatar) {
+        Bundle extras = data.getExtras();
+        Bitmap bitmap = (Bitmap) extras.get("data");
+        if (bitmap != null) {
+            //TODO: Resize and convert to PNG
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream);
+            avatar.setImageBitmap(bitmap);
+            return RequestBody.create(MediaType.parse("image/*"), stream.toByteArray());
         }
         return null;
     }
