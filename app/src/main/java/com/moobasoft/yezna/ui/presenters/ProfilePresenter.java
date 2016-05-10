@@ -7,8 +7,6 @@ import com.moobasoft.yezna.rest.services.UserService;
 import com.moobasoft.yezna.ui.RxSchedulers;
 import com.moobasoft.yezna.ui.presenters.base.RxPresenter;
 
-import java.io.File;
-
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import rx.Subscription;
@@ -28,8 +26,7 @@ public class ProfilePresenter extends RxPresenter<ProfilePresenter.View> {
         this.userService = userService;
     }
 
-    public void updateProfile(String email, String password,
-                              String imagePath, String imageUrl, RequestBody capturedAvatarRb) {
+    public void updateProfile(String email, String password, RequestBody avatarRb) {
 
         RequestBody emailRb = null;
         if (!TextUtils.isEmpty(email)) //TODO: Validation
@@ -39,18 +36,8 @@ public class ProfilePresenter extends RxPresenter<ProfilePresenter.View> {
         if (!TextUtils.isEmpty(password)) //TODO: Validation
             passwordRb = RequestBody.create(MediaType.parse("text/plain"), password);
 
-        RequestBody avatarFileRb = null;
-        if (capturedAvatarRb != null) {
-            avatarFileRb = capturedAvatarRb;
-        } else if (!TextUtils.isEmpty(imagePath))
-            avatarFileRb = RequestBody.create(MediaType.parse("image/*"), new File(imagePath));
-
-        RequestBody avatarUrlRb = null;
-        if (!TextUtils.isEmpty(imageUrl))
-            avatarUrlRb = RequestBody.create(MediaType.parse("text/plain"), imageUrl);
-
         Subscription createSubscription = userService
-                .updateProfile(emailRb, passwordRb, avatarUrlRb, avatarFileRb)
+                .updateProfile(emailRb, passwordRb, avatarRb)
                 .compose(rxSchedulers.applySchedulers())
                 .subscribe(view::onProfileUpdated, this::handleError);
 

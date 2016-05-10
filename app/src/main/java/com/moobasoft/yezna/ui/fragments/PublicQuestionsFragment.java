@@ -97,7 +97,7 @@ public class PublicQuestionsFragment extends RxFragment
         if (questions.isEmpty() || errorViewVisible || emptyViewVisible)
             activateLoadingView();
 
-        int fromId = (questions.isEmpty()) ?
+        int fromId = (questions.isEmpty()) ? //FIXME: User.lastAnswered() needs to be updated
                 0 : questions.get(questions.size() - 1).getId();
         presenter.loadSummaries(refresh, fromId);
     }

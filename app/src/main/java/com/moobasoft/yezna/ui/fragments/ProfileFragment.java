@@ -2,8 +2,13 @@ package com.moobasoft.yezna.ui.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
@@ -23,13 +28,20 @@ import com.moobasoft.yezna.ui.fragments.base.RxFragment;
 import com.moobasoft.yezna.ui.presenters.ProfilePresenter;
 import com.moobasoft.yezna.util.ImageUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import icepick.Icicle;
+import okhttp3.MediaType;
 import okhttp3.RequestBody;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class ProfileFragment extends RxFragment implements ProfilePresenter.View {
 
@@ -41,9 +53,9 @@ public class ProfileFragment extends RxFragment implements ProfilePresenter.View
     @Bind(R.id.profile_password) TextView password;
     @Bind(R.id.profile_email) EditText email;
 
-    @Icicle String avatarPath;
-    @Icicle String avatarUrl;
-    private RequestBody avatarRequestBody;
+    //@Icicle String avatarPath;
+    //@Icicle String avatarUrl;
+    private RequestBody avatarRb;
 
     public ProfileFragment() {
     }
@@ -91,13 +103,11 @@ public class ProfileFragment extends RxFragment implements ProfilePresenter.View
 
     @Override public void onProfileUpdated(User user) {
         credentialStore.saveUser(user);
-         eventBus.send(new LoginEvent()); //TODO: Make new event?
+        eventBus.send(new LoginEvent()); //TODO: Make new event?
+
+        avatarRb = null;
+        avatar.setImageBitmap(null);
         loadUserData();
-
-        avatarRequestBody = null;
-        avatarPath = null;
-        avatarUrl = null;
-
         Snackbar.make(avatar, getString(R.string.profile_update), Snackbar.LENGTH_SHORT).show();
     }
 
@@ -107,18 +117,10 @@ public class ProfileFragment extends RxFragment implements ProfilePresenter.View
 
     @OnClick(R.id.update_profile_btn)
     public void clickUpdateBtn() {
-        presenter.updateProfile(email.getText().toString(), password.getText().toString(), avatarPath, avatarUrl, avatarRequestBody);
+        presenter.updateProfile(email.getText().toString(), password.getText().toString(), avatarRb);
     }
 
-    @OnClick(R.id.capture_image_btn)
-    public void cameraButtonClicked() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, ImageUtil.REQUEST_CAPTURE_IMAGE);
-        }
-    }
-
-    @OnClick(R.id.select_image_btn)
+    @OnClick(R.id.profile_avatar)
     public void imageButtonClicked() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -128,23 +130,81 @@ public class ProfileFragment extends RxFragment implements ProfilePresenter.View
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ImageUtil.REQUEST_CAPTURE_IMAGE && resultCode == Activity.RESULT_OK) {
-            avatarRequestBody = ImageUtil.getBitmapFromData(data, avatar);
-        } else if (requestCode == ImageUtil.REQUEST_SELECT_IMAGE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == ImageUtil.REQUEST_SELECT_IMAGE && resultCode == Activity.RESULT_OK &&
+                data != null && data.getData() != null) {
 
-            ImageUtil.ImageResult result = ImageUtil
-                    .onImageSelected(getActivity().getApplicationContext(),
-                            requestCode, resultCode, data, getActivity().findViewById(R.id.toolbar));
+            Uri uri = data.getData();
 
-            if (result != null) {
-                avatarPath = result.avatarPath;
-                avatarUrl = result.avatarUrl;
-
-                if (avatarPath != null)
-                    Glide.with(this).load(avatarPath).into(avatar);
-                else if (avatarUrl != null)
-                    Glide.with(this).load(avatarUrl).into(avatar);
-            }
+            bitmapObservable(uri)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(bitmap -> avatar.setImageBitmap(bitmap));
         }
     }
+
+    @NonNull private Observable<Bitmap> bitmapObservable(final Uri uri) {
+        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+            @Override public void call(Subscriber<? super Bitmap> subscriber) {
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                    bitmap = rotateAndScaleBitmap(uri, bitmap);
+
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+                    avatarRb = RequestBody.create(MediaType.parse("image/jpeg"), stream.toByteArray());
+                    stream.close();
+
+                    subscriber.onNext(bitmap);
+                    subscriber.onCompleted();
+                } catch (IOException e) {
+                    subscriber.onError(e);
+                }
+            }
+        });
+    }
+
+    public Bitmap rotateAndScaleBitmap(Uri contentUri, Bitmap image) {
+        String [] projection =
+                {MediaStore.Images.Media.DATA, MediaStore.Images.Media.ORIENTATION};
+        Cursor cursor = getActivity().getContentResolver().query(
+                contentUri, projection, null, null, null);
+
+        int rotation = 0;
+        if (cursor != null && cursor.moveToFirst()) {
+            rotation = cursor.getInt(1);
+            cursor.close();
+        }
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int maxWidth = 600;
+        int maxHeight = 600;
+
+        if (width > height && width > maxWidth) {
+            // landscape
+            int ratio = width / maxWidth;
+            width = maxWidth;
+            height = height / ratio;
+        } else if (height > width && height > maxHeight) {
+            // portrait
+            int ratio = height / maxHeight;
+            height = maxHeight;
+            width = width / ratio;
+        } else {
+            // square
+            height = maxHeight;
+            width = maxWidth;
+        }
+
+
+        // calculate the scale - in this case = 0.4f
+        float scaleWidth = ((float) width) / image.getWidth();
+        float scaleHeight = ((float) height) / image.getHeight();
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        matrix.postRotate(rotation);
+        return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+    }
+
 }

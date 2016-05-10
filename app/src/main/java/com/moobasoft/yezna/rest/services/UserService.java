@@ -50,7 +50,6 @@ public interface UserService {
     @PATCH("/api/users/")
     Observable<User> updateProfile(@Part("user[email]") RequestBody email,
                                    @Part("user[password]") RequestBody password,
-                                   @Part("user[avatar]") RequestBody avatarUrl,
                                    @Part("user[avatar]\"; filename=\"filename\" ") RequestBody avatarFile);
 
     @FormUrlEncoded
